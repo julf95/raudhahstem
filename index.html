@@ -1,0 +1,3825 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STEM UNIVERSE | Hand Control</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #02040b;
+  color: #e8faff;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+}
+
+#universe {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+#universe canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hud {
+  position: fixed;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.top {
+  top: 24px;
+  left: 24px;
+  right: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.brand {
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: #6deeff;
+  margin-bottom: 9px;
+}
+
+h1 {
+  font-size: clamp(22px, 4vw, 42px);
+  font-weight: 300;
+  letter-spacing: 3px;
+}
+
+.subtitle {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #8a9db7;
+  margin-top: 9px;
+}
+
+.status {
+  background: rgba(5, 18, 34, .78);
+  border: 1px solid rgba(80, 220, 255, .28);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 12px;
+  color: #8daabd;
+  backdrop-filter: blur(12px);
+  max-width: 230px;
+}
+
+.status strong {
+  display: block;
+  color: #76f4ff;
+  margin-bottom: 6px;
+}
+
+.bottom {
+  left: 24px;
+  right: 24px;
+  bottom: 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 18px;
+}
+
+.instructions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 700px;
+}
+
+.instruction {
+  background: rgba(7, 18, 34, .76);
+  border: 1px solid rgba(94, 191, 255, .2);
+  border-radius: 10px;
+  padding: 12px 15px;
+  font-size: 11px;
+  color: #a4b8d0;
+  backdrop-filter: blur(12px);
+}
+
+.instruction b {
+  display: block;
+  color: #e6fbff;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+#startBtn {
+  pointer-events: auto;
+  border: 1px solid #66f2ff;
+  color: #001018;
+  background: #71efff;
+  border-radius: 10px;
+  padding: 15px 20px;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 0 24px rgba(65, 220, 255, .22);
+  white-space: nowrap;
+}
+
+#startBtn:hover {
+  background: white;
+}
+
+#startBtn:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+
+#cameraPreview {
+  position: fixed;
+  right: 20px;
+  bottom: 100px;
+  width: 145px;
+  height: 108px;
+  object-fit: cover;
+  transform: scaleX(-1);
+  border: 1px solid rgba(88, 226, 255, .35);
+  border-radius: 10px;
+  opacity: .65;
+  display: none;
+  z-index: 3;
+  pointer-events: none;
+}
+
+#gesture {
+  color: #75efff;
+  font-size: 11px;
+  letter-spacing: 1px;
+  margin-top: 7px;
+}
+
+#help {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  background: rgba(1, 4, 12, .9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 22px;
+  backdrop-filter: blur(15px);
+}
+
+.help-card {
+  width: min(430px, 100%);
+  padding: 30px;
+  border-radius: 18px;
+  border: 1px solid rgba(100, 225, 255, .3);
+  background: #071222;
+  text-align: center;
+}
+
+.help-card h2 {
+  font-weight: 400;
+  letter-spacing: 2px;
+  margin-bottom: 14px;
+  color: #77efff;
+}
+
+.help-card p {
+  color: #a4b8cf;
+  font-size: 13px;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+@media(max-width: 600px) {
+  .top {
+    top: 15px;
+    left: 15px;
+    right: 15px;
+  }
+
+  h1 {
+    font-size: 22px;
+  }
+
+  .subtitle {
+    font-size: 9px;
+    max-width: 190px;
+    line-height: 1.6;
+  }
+
+  .status {
+    max-width: 145px;
+    padding: 10px;
+    font-size: 10px;
+  }
+
+  .bottom {
+    left: 15px;
+    right: 15px;
+    bottom: 15px;
+    align-items: flex-end;
+  }
+
+  .instructions {
+    gap: 6px;
+  }
+
+  .instruction {
+    padding: 9px;
+    font-size: 10px;
+  }
+
+  .instruction b {
+    font-size: 10px;
+  }
+
+  #startBtn {
+    padding: 13px;
+    font-size: 10px;
+  }
+
+  #cameraPreview {
+    width: 105px;
+    height: 78px;
+    right: 15px;
+    bottom: 145px;
+  }
+}
+
+
+/* Centre target HUD — YELLOW / GOLD */
+#targetHUD {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 116px;
+  height: 116px;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: .85;
+  transition: opacity .25s ease, filter .25s ease;
+}
+
+#targetHUD svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+
+#targetHUD .hud-track {
+  fill: none;
+  stroke: rgba(255, 210, 0, .55);
+  stroke-width: 4;
+}
+
+#targetHUD .hud-progress {
+  fill: none;
+  stroke: #fff200;
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-dasharray: 282.74;
+  stroke-dashoffset: 282.74;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  filter:
+    drop-shadow(0 0 5px #ffe600)
+    drop-shadow(0 0 12px #ffae00)
+    drop-shadow(0 0 22px rgba(255, 180, 0, .9));
+}
+
+  stroke-linecap: round;
+  stroke-dasharray: 282.74;
+  stroke-dashoffset: 282.74;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  filter: drop-shadow(0 0 5px #ffe600);
+}
+
+#targetHUD .hud-inner {
+  position: absolute;
+  inset: 15px;
+  border: 1px solid rgba(255, 230, 0, .5);
+  border-radius: 50%;
+  box-shadow:
+    0 0 18px rgba(255, 230, 0, .12),
+    inset 0 0 18px rgba(255, 230, 0, .08);
+}
+
+#targetHUD .hud-cross {
+  position: relative;
+  width: 7px;
+  height: 7px;
+  border: 1px solid #fff4a3;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #ffe600;
+}
+
+#targetHUD .hud-cross:before,
+#targetHUD .hud-cross:after {
+  content: "";
+  position: absolute;
+  background: rgba(255, 230, 0, .85);
+}
+
+#targetHUD .hud-cross:before {
+  width: 23px;
+  height: 1px;
+  left: -9px;
+  top: 2px;
+}
+
+#targetHUD .hud-cross:after {
+  width: 1px;
+  height: 23px;
+  left: 2px;
+  top: -9px;
+}
+
+#targetHUD.locking {
+  opacity: 1;
+  filter: drop-shadow(0 0 10px rgba(255, 230, 0, .8));
+}
+
+#targetHUD.locked .hud-progress {
+  stroke: #ffffff;
+  filter: drop-shadow(0 0 8px #ffe600);
+}
+
+#targetLabel {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #ffe600;
+  text-shadow: 0 0 8px #ffe600;
+}
+
+#whiteFlash {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#whiteFlash.active {
+  animation: whiteFlashIn .75s ease-in forwards;
+}
+
+@keyframes whiteFlashIn {
+  0% { opacity: 0; }
+  45% { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+body.activation-running .hud,
+body.activation-running #cameraPreview,
+body.activation-running #targetHUD { 
+  transition: opacity .4s ease;
+}
+
+body.activation-running .hud.top,
+body.activation-running .hud.bottom,
+body.activation-running #cameraPreview {
+  opacity: 0;
+}
+
+@media(max-width:600px) {
+  #targetHUD {
+    width: 94px;
+    height: 94px;
+  }
+
+  #targetLabel {
+    font-size: 8px;
+    letter-spacing: 1.5px;
+  }
+}
+
+
+
+
+.title-with-logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.raudhah-logo {
+  width: 55px; 
+  height: 55px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 8px rgba(109, 238, 255, 0.4));
+}
+
+@media (max-width: 600px) {
+  .raudhah-logo {
+    width: 38px;
+    height: 38px;
+  }
+
+  .title-with-logo {
+    gap: 9px;
+  }
+}
+
+
+ 
+
+
+#welcomeMessage {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 6;
+
+  width: min(560px, 90vw);
+  height: 440px; /* FIXED HEIGHT */
+  padding: 35px 25px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+
+  text-align: center;
+  pointer-events: none;
+
+  background: linear-gradient(
+    135deg,
+    rgba(5, 24, 48, 0.94),
+    rgba(8, 10, 35, 0.92)
+  );
+
+  border: 1px solid rgba(109, 238, 255, 0.65);
+  border-radius: 18px;
+
+  box-shadow:
+    0 0 25px rgba(0, 225, 255, 0.18),
+    inset 0 0 25px rgba(0, 225, 255, 0.06);
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  opacity: 1;
+  transition: opacity 0.8s ease, filter 0.8s ease, transform 0.8s ease;
+}
+ 
+.welcome-line {
+  color: #8df7ff;
+  font-size: clamp(21px, 4vw, 38px);
+  letter-spacing: 3px;
+  font-weight: bold;
+  text-shadow: 0 0 15px rgba(65, 230, 255, 0.8);
+  animation: welcomeAppear 1.1s ease both;
+}
+
+.welcome-subtitle {
+  margin-top: 16px;
+  color: #ffffff;
+  font-size: clamp(12px, 2vw, 19px);
+  letter-spacing: 2px;
+  animation: welcomeAppear 1.1s ease 0.3s both;
+}
+
+.welcome-hint { 
+  margin-top: auto;
+  padding-top: 20px; 
+  color: #78c9e8;
+  font-size: 10px;
+  letter-spacing: 2px;
+  animation: welcomeAppear 1.1s ease 0.6s both;
+}
+
+#welcomeMessage.dismissed {
+  opacity: 0;
+  filter: blur(12px);
+  transform: translate(calc(50vw + 100%), -50%);
+}
+
+/* Yellow glow when fist is detected */
+#welcomeMessage.fist-detected {
+  border-color: #ffe600;
+  box-shadow:
+    0 0 15px rgba(255, 230, 0, 0.8),
+    0 0 35px rgba(255, 230, 0, 0.4),
+    inset 0 0 20px rgba(255, 230, 0, 0.12);
+}
+
+@keyframes welcomeAppear {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* SCHOLAR SCAN MESSAGE */
+#scholarMessage {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  width: min(760px, 90vw);
+  text-align: center;
+  pointer-events: none;
+  padding: 25px;
+  background: rgba(3, 7, 18, .88);
+  border: 1px solid rgba(255, 230, 0, .65);
+  border-radius: 16px;
+  box-shadow: 0 0 35px rgba(255, 230, 0, .2);
+  backdrop-filter: blur(12px);
+}
+
+#scholarMessage .scholar-name {
+  color: #ffe600;
+  font-size: clamp(23px, 4vw, 40px);
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-shadow: 0 0 18px rgba(255, 230, 0, .7);
+  margin-bottom: 18px;
+}
+
+#scholarMessage .scholar-info {
+  color: #ffffff;
+  font-size: clamp(15px, 2.5vw, 25px);
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+/* YELLOW SPARK BURST */
+#sparkBurst {
+  position: fixed;
+  inset: 0;
+  z-index: 12;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.scan-spark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #ffe600;
+  box-shadow: 0 0 8px #ffe600, 0 0 18px #ffae00;
+  animation: sparkFly .7s ease-out forwards;
+}
+
+@keyframes sparkFly {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(
+      calc(-50% + var(--dx)),
+      calc(-50% + var(--dy))
+    ) scale(0);
+  }
+}
+
+/* FINAL WHITE-BLUE POSTER SCREEN */
+#posterScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4vw;
+  background: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    #eaf7ff 40%,
+    #9bd8ff 75%,
+    #4da6ff 100%
+  );
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 1.5s ease;
+}
+
+#posterScreen.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+#finalPoster {
+  display: block;
+  width: min(92vw, 1200px);
+  max-height: 88vh;
+  object-fit: contain;
+  opacity: 0;
+  transform: scale(0.96);
+  transition:
+    opacity 1.5s ease,
+    transform 1.5s ease;
+}
+
+#posterScreen.show #finalPoster {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* FINAL POSTER SCREEN */
+#posterScreen {
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+}
+
+/* Fire sparks layer */
+#fireSparks {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+#finalPoster {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+#fireSparks {
+  z-index: 5;
+}
+
+
+.mission-message {
+  margin-top: 24px;
+  padding: 18px 14px;
+  border: 1px solid rgba(255, 214, 80, 0.65);
+  border-radius: 12px;
+  background: rgba(255, 190, 30, 0.08);
+  box-shadow: 0 0 20px rgba(255, 190, 30, 0.12);
+  animation: welcomeAppear 0.8s ease both;
+  flex-shrink: 0;
+  width: 100%;
+  min-height: 145px;
+}
+
+.mission-title {
+  color: #ffe36b;
+  font-size: clamp(15px, 2.5vw, 32px);
+  font-weight: 900;
+  letter-spacing: 3px;
+  margin-bottom: 12px;
+  text-shadow: 0 0 12px rgba(255, 210, 70, 0.6);
+}
+
+.mission-description {
+  color: #f2f7ff;
+  font-size: clamp(12px, 2vw, 23px);
+  line-height: 1.8;
+  letter-spacing: 0.5px;
+}
+
+/* MISSION TEXT APPEARS LINE BY LINE */
+.mission-line {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: missionLineReveal 0.6s ease-out forwards;
+}
+
+.mission-line:nth-child(1) {
+  animation-delay: 0.3s;
+}
+
+.mission-line:nth-child(2) {
+  animation-delay: 0.4s;
+}
+
+.mission-line:nth-child(3) {
+  animation-delay: 0.5s;
+}
+
+.mission-line:nth-child(4) {
+  animation-delay: 0.6s;
+}
+
+@keyframes missionLineReveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#missionMessage {
+  opacity: 0;
+  transform: scale(0.5) translateY(30px);
+  transform-origin: center;
+  transition: none;
+}
+
+#missionMessage.pop-up {
+  animation: missionPopUp 0.7s cubic-bezier(0.16, 1.3, 0.5, 1) forwards;
+}
+
+@keyframes missionPopUp {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(8px);
+  }
+
+  70% {
+    opacity: 1;
+    transform: scale(1.02) translateY(-1px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes missionGlowBlink {
+  0%, 100% {
+    border-color: rgba(255, 214, 80, 0.45);
+    box-shadow:
+      0 0 8px rgba(255, 190, 30, 0.2),
+      0 0 18px rgba(255, 190, 30, 0.1);
+    background: rgba(255, 190, 30, 0.05);
+  } 
+
+  50% {
+    border-color: rgba(255, 230, 100, 1);
+    box-shadow:
+      0 0 15px rgba(255, 210, 50, 0.8),
+      0 0 35px rgba(255, 190, 30, 0.6),
+      0 0 55px rgba(255, 170, 0, 0.3);
+    background: rgba(255, 190, 30, 0.16);
+  }
+}
+
+
+/* FOUR SCHOLAR PROGRESS CIRCLES */
+#scholarProgress {
+  position: fixed;
+  left: 50%;
+  top: calc(50% + 78px);
+  transform: translateX(-50%);
+  z-index: 5;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  pointer-events: none;
+}
+
+.scholar-dot {
+  width: 30px;
+  height: 30px; 
+  flex-shrink: 0;  
+
+  border-radius: 50%;
+  background: rgba(100, 120, 140, 0.25);
+  border: 1px solid rgba(160, 190, 210, 0.45);
+
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+
+  transition:
+    background 0.4s ease,
+    border-color 0.4s ease,
+    box-shadow 0.4s ease,
+    transform 0.4s ease;
+}
+
+/* GREEN WHEN A SCHOLAR IS SUCCESSFULLY SCANNED */
+.scholar-dot.scanned {
+  background: #39ff88;
+  border-color: #aaffcc;
+
+  box-shadow:
+    0 0 8px rgba(57, 255, 136, 0.9),
+    0 0 18px rgba(57, 255, 136, 0.6);
+
+  transform: scale(1.15);
+}
+
+@media (max-width: 600px) {
+  #scholarProgress {
+    top: calc(50% + 65px);
+    gap: 10px;
+  }
+
+  .scholar-dot {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+/* SUCCESS MESSAGE BELOW THE 4 SCAN CIRCLES */
+#scanSuccessMessage {
+  position: fixed;
+  top: calc(50% + 125px);
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  width: min(700px, 92vw);
+  z-index: 6;
+  text-align: center;
+  pointer-events: none;
+
+  opacity: 0;
+  visibility: hidden;
+
+  color: #8dffbd;
+  font-size: clamp(20px, 3.5vw, 36px);
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  line-height: 1.8;
+
+  text-shadow:
+    0 0 8px rgba(57, 255, 136, 0.9),
+    0 0 22px rgba(57, 255, 136, 0.55); 
+
+  transition:
+    opacity 0.8s ease,
+    transform 0.8s ease, 
+    visibility 0.8s ease;
+}
+
+#scanSuccessMessage.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+#scanSuccessMessage .launch-text {
+  display: block;
+  margin-top: 4px;
+  color: #ffe680;
+  text-shadow:
+    0 0 8px rgba(255, 210, 50, 0.9),
+    0 0 20px rgba(255, 170, 0, 0.55);
+}
+
+@media (max-width: 600px) {
+  #scanSuccessMessage {
+    top: calc(50% + 105px);
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    padding: 0 8px;
+  }
+}
+
+
+/* SCI-FI SCHOLAR MESSAGE POP-UP */
+#scholarMessage {
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, -50%) scale(0.65);
+  filter: blur(8px);
+  transition: none;
+}
+
+#scholarMessage.pop-up {
+  animation: scholarPopUp 0.65s cubic-bezier(0.16, 1.3, 0.5, 1) forwards;
+  visibility: visible;
+}
+
+@keyframes scholarPopUp {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.65);
+    filter: blur(8px);
+  }
+
+  65% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.06);
+    filter: blur(0);
+  }
+
+  85% {
+    transform: translate(-50%, -50%) scale(0.97);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    filter: blur(0);
+    box-shadow:
+      0 0 20px rgba(255, 230, 0, 0.4),
+      0 0 45px rgba(255, 190, 0, 0.2);
+  }
+}
+
+#blackFade {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 999999;
+  transition: opacity 2.5s ease;
+}
+
+#blackFade.active {
+  opacity: 1;
+}
+
+
+
+/* SCI-FI BOX — SEMUA FAIL DIAKTIFKAN */
+#scanSuccessMessage {
+  width: min(760px, 92vw);
+  padding: 18px 24px;
+
+  background:
+    linear-gradient(135deg,
+      rgba(0, 20, 38, 0.96),
+      rgba(4, 10, 28, 0.94));
+
+  border: 1px solid rgba(90, 240, 255, 0.9);
+  border-radius: 4px;
+
+  box-shadow:
+    0 0 12px rgba(0, 225, 255, 0.35),
+    0 0 30px rgba(0, 225, 255, 0.18),
+    inset 0 0 22px rgba(0, 225, 255, 0.09);
+
+  color: #baffff;
+
+  text-shadow:
+    0 0 8px rgba(0, 240, 255, 0.9),
+    0 0 18px rgba(0, 200, 255, 0.45);
+}
+
+/* Neon corner brackets */
+#scanSuccessMessage::before,
+#scanSuccessMessage::after {
+  content: "";
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+}
+
+#scanSuccessMessage::before {
+  top: -4px;
+  left: -4px;
+  border-top: 3px solid #ffe680;
+  border-left: 3px solid #ffe680;
+}
+
+#scanSuccessMessage::after {
+  right: -4px;
+  bottom: -4px;
+  border-right: 3px solid #ffe680;
+  border-bottom: 3px solid #ffe680;
+}
+
+/* Highlight the launch text */
+#scanSuccessMessage .launch-text {
+  color: #ffe680;
+  text-shadow:
+    0 0 8px rgba(255, 220, 90, 1),
+    0 0 22px rgba(255, 180, 0, 0.7);
+} 
+
+/* Mobile readability */
+@media (max-width: 600px) {
+  #scanSuccessMessage {
+    width: 92vw;
+    padding: 14px 12px;
+    line-height: 1.6;
+  }
+}
+
+/* SCI-FI POSTER LOADING BAR */
+#posterLoadingBar {
+  position: fixed;
+  left: 50%;
+  bottom: 20%;
+  transform: translateX(-50%);
+  width: min(560px, 78vw);
+  height: 12px;
+  padding: 2px;
+  background: rgba(5, 15, 35, 0.9);
+  border: 1px solid #55dfff;
+  box-shadow: 0 0 12px rgba(0, 200, 255, 0.5);
+  border-radius: 2px;
+  z-index: 100001;
+  opacity: 0;
+  visibility: hidden;
+}
+
+#posterLoadingBar.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+#posterLoadingFill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #168cff, #65f5ff, #ffffff);
+  box-shadow: 0 0 10px #40dfff;
+  transition: width 3s linear;
+}
+
+#posterLoadingBar.visible #posterLoadingFill {
+  width: 100%;
+}
+
+/* SCI-FI ACTIVATION TEXT */
+#activationText {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20% + 28px);
+  transform: translateX(-50%);
+  color: #087dff;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(13px, 2.5vw, 22px);
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 0 0 8px #55dfff, 0 0 18px rgba(0, 145, 255, 0.8);
+  opacity: 0;
+  visibility: hidden;
+  z-index: 100002;
+}
+
+#activationText.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+#activationText::after {
+  content: "▋";
+  margin-left: 5px;
+  animation: cursorBlink 0.45s steps(2, start) infinite;
+}
+
+@keyframes cursorBlink {
+  to { visibility: hidden; }
+}
+
+</style> 
+</head>
+
+<body>
+
+<div id="universe"></div>
+
+
+<div id="welcomeMessage" class="hidden">
+  <div class="welcome-line">
+      WELCOME BACK,<br>
+      UST BUNYAMIN
+    </div>
+  <div class="welcome-subtitle">*************</div>
+ 
+  <div id="missionMessage" class="mission-message hidden">
+    <div class="mission-title">⚡MISI HARI INI⚡ </div>
+    <div class="mission-description">
+      <div class="mission-line">Aktifkan fail</div>
+      <div class="mission-line">
+        <strong>"4 Ulama Sains Islam"</strong>
+      </div>
+      <div class="mission-line">Untuk pelancaran Minggu STEM 2026.</div>
+    </div>
+  </div>
+
+  <div class="welcome-hint">✊ MOVE YOUR FIST TO DISMISS</div>
+</div>
+
+
+<audio id="backgroundMusic" preload="auto">
+  <source src="background.mp3" type="audio/mpeg">
+</audio>
+<div id="targetHUD" aria-hidden="true"><svg viewBox="0 0 100 100"><circle class="hud-track" cx="50" cy="50" r="45"></circle><circle id="hudProgress" class="hud-progress" cx="50" cy="50" r="45"></circle></svg><div class="hud-inner"></div><div class="hud-cross"></div><div id="targetLabel">ALIGN TEXT TO LOCK</div></div>
+<!-- SCHOLAR SCAN PROGRESS -->
+<div id="scholarProgress">
+  <div class="scholar-dot"></div>
+  <div class="scholar-dot"></div>
+  <div class="scholar-dot"></div>
+  <div class="scholar-dot"></div>
+</div>
+
+<!-- SUCCESS MESSAGE AFTER ALL 4 SCHOLARS ARE SCANNED -->
+<div id="scanSuccessMessage">
+  KESEMUA 4 FAIL ILMUWAN BERJAYA DIAKTIFKAN ✅
+  <span class="launch-text">
+    JOM MULAKAN SCAN PELANCARAN...
+  </span>
+</div>
+<div id="whiteFlash"></div>
+
+<div id="scholarMessage" class="hidden">
+  <div class="scholar-name" id="scholarMessageName"></div>
+  <div class="scholar-info" id="scholarMessageInfo"></div>
+</div>
+
+<div id="sparkBurst"></div>
+
+<div class="hud top">
+  <div>
+    <div class="brand">EXPERIMENT 001 / INTERACTIVE SPACE</div>
+    
+<div class="title-with-logo">
+  <img
+    src="https://raw.githubusercontent.com/julf95/classroom/main/Logo%20Raudhah.png"
+    alt="Logo SR Ar Raudhah"
+    class="raudhah-logo"
+  >
+  <h1>RAUDHAH UNIVERSE</h1>
+</div>
+
+    <div class="subtitle">YOUR HANDS CONTROL THE DIMENSION</div>
+  </div>
+
+  <div class="status">
+    <strong id="statusTitle">SYSTEM STANDBY</strong>
+    <span id="statusText">Start camera to begin</span>
+    <div id="gesture">WAITING FOR HANDS</div>
+  </div>
+</div>
+
+<div class="hud bottom">
+  <div class="instructions">
+    <div class="instruction">
+      <b>↔ TWO HANDS</b>
+      Move apart to enter the sphere
+    </div>
+    <div class="instruction">
+      <b>↔ HANDS CLOSER</b>
+      Pull back into space
+    </div>
+    <div class="instruction">
+      <b>✊ MAKE A FIST</b>
+      Move fist to rotate the view
+    </div>
+  </div>
+
+  <button id="startBtn">START CAMERA ↗</button>
+</div>
+
+<video id="cameraPreview" autoplay playsinline muted></video>
+
+<div id="help">
+  <div class="help-card">
+    <h2>🌏ENTER RAUDHAH FILES</h2>
+    <p>
+      Allow camera access and show both hands.
+      Separate your hands to travel inside a glowing
+      sphere of 3D particles. Make a fist and move it
+      to rotate your view.
+    </p>
+    <button id="enterBtn" style="
+      background:#71efff;
+      color:#001018;
+      border:0;
+      border-radius:9px;
+      padding:14px 25px; 
+      font-weight:bold;
+      cursor:pointer;
+      letter-spacing:1px;">
+      INITIALIZE NOW
+    </button>
+    <p id="errorText" style="margin-top:14px;margin-bottom:0"></p>
+  </div>
+</div>
+
+<!-- 3D engine -->  
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+<!-- Hand tracking -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+<script>
+// SPACE AMBIENCE BACKGROUND MUSIC
+const backgroundMusic = new Audio(
+  "https://raw.githubusercontent.com/julf95/classroom/main/can-you-hear-the-music-oppenheimer-soundtrack-epic-extended_G5waZdqD.m4a"
+);
+
+backgroundMusic.loop = true;  
+backgroundMusic.volume = 0.8;
+backgroundMusic.preload = "auto";
+
+
+function startBackgroundMusic() {
+  backgroundMusic.currentTime = 0;
+  backgroundMusic.volume = 0;
+
+  backgroundMusic.play().then(() => {
+    const targetVolume = 0.8;
+    const fadeDuration = 500; // 4 seconds
+    const startTime = performance.now();
+
+    function fadeIn(now) {
+      const progress = Math.min(
+        (now - startTime) / fadeDuration,
+        1
+      );
+
+      backgroundMusic.volume = targetVolume * progress;
+
+      if (progress < 1) {
+        requestAnimationFrame(fadeIn);
+      }
+    }
+
+    requestAnimationFrame(fadeIn);
+
+  }).catch(error => {
+    console.log("Audio playback requires user interaction:", error);
+  });
+}
+
+
+// JUMP TO THE LAST 40% OF THE MARVEL THEME
+function playMarvelFinal40() {
+  backgroundMusic.pause();
+
+  const jumpToFinalPart = () => {
+    const duration = backgroundMusic.duration;
+
+    if (!Number.isFinite(duration) || duration <= 0) {
+      console.log("Waiting for Marvel music duration...");
+      return;
+    }
+
+    // Start at 60% of the song = play the final 40%
+    backgroundMusic.currentTime = duration * 0.70;
+    backgroundMusic.volume = 0.8;
+    backgroundMusic.loop = false;
+
+    backgroundMusic.play().catch(error => {
+      console.log("Marvel finale playback failed:", error);
+    });
+  };
+
+  if (Number.isFinite(backgroundMusic.duration) &&
+      backgroundMusic.duration > 0) {
+    jumpToFinalPart();
+  } else {
+    backgroundMusic.addEventListener(
+      "loadedmetadata",
+      jumpToFinalPart,
+      { once: true }
+    );
+    backgroundMusic.load();
+  }
+}
+
+function fadeOutBackgroundMusic() {
+  const fadeDuration = 3000;
+  const startVolume = backgroundMusic.volume;
+  const startTime = performance.now();
+
+  function fadeStep(now) {
+    const progress = Math.min(
+      (now - startTime) / fadeDuration,
+      1
+    );
+
+    backgroundMusic.volume = startVolume * (1 - progress);
+
+    if (progress < 1) {
+      requestAnimationFrame(fadeStep);
+    } else {
+      backgroundMusic.pause();
+      backgroundMusic.currentTime = 0;
+      backgroundMusic.volume = 0.8;
+    }
+  }
+
+  requestAnimationFrame(fadeStep);
+}
+
+// Automatically fade out during the final 3 seconds of the music
+backgroundMusic.addEventListener("timeupdate", () => {
+  if (
+    Number.isFinite(backgroundMusic.duration) &&
+    backgroundMusic.duration > 3 &&
+    backgroundMusic.currentTime >= backgroundMusic.duration - 3 &&
+    !backgroundMusic.dataset.finalFadeStarted
+  ) {
+    backgroundMusic.dataset.finalFadeStarted = "true";
+    fadeOutBackgroundMusic();
+  }
+});
+
+// START MUSIC AFTER THE FIRST USER INTERACTION
+document.addEventListener("pointerdown", function playMusicOnce() {
+  startBackgroundMusic()
+    .then(() => {
+      console.log("Space ambience playing successfully");
+    })
+    .catch(error => {
+      console.error("Audio playback failed:", error);
+    });
+}, { once: true });
+
+
+// BINARY CODE SOUND — PRELOAD EARLY
+const binarySound = new Audio(
+  "https://raw.githubusercontent.com/julf95/classroom/main/sci-fi-button-sound-effect_TRUqODXT.m4a"
+);
+
+// SCHOLAR SCAN SUCCESS SOUND
+const scholarScanSound = new Audio(
+  "https://raw.githubusercontent.com/julf95/classroom/main/sci-fi-button-sound-effect_TRUqODXT.m4a"
+);
+
+// SOUND WHEN ALL 4 SCHOLARS ARE SCANNED
+const elixirSound = new Audio(
+  "https://raw.githubusercontent.com/julf95/classroom/main/Dishonored-Sokolov-s-Elixir-Sound-Effect.m4a"
+);
+
+elixirSound.volume = 1.0;
+elixirSound.preload = "auto";
+elixirSound.load();
+
+function playElixirSound() {
+  elixirSound.currentTime = 0;
+
+  elixirSound.play().catch(error => {
+    console.log("Elixir sound playback failed:", error);
+  });
+}
+
+// SOUND AFTER THE FINAL LOGO SCAN
+const logoScanFinishSound = new Audio(
+  "https://raw.githubusercontent.com/julf95/classroom/main/binary-code-sfx-game-sounds-shorts-sfx-editing_b0djkZaa.m4a"
+);
+
+logoScanFinishSound.volume = 1.0;
+logoScanFinishSound.preload = "auto";
+logoScanFinishSound.load();
+
+function playLogoScanFinishSound() {
+  logoScanFinishSound.currentTime = 0;
+
+  logoScanFinishSound.play().catch(error => {
+    console.log("Logo scan finish sound failed:", error);
+  });
+}
+  
+scholarScanSound.volume = 1.0;
+scholarScanSound.preload = "auto";
+scholarScanSound.load();
+
+function playScholarScanSound() { 
+  scholarScanSound.currentTime = 0; 
+
+  scholarScanSound.play().catch(error => {
+    console.log("Scholar scan sound playback failed:", error);
+  });
+}
+
+binarySound.volume = 0.7;
+binarySound.preload = "auto";
+
+// Ask browser to load the sound immediately
+binarySound.load();
+
+
+const welcomeSound = new Audio(
+  "https://raw.githubusercontent.com/julf95/classroom/main/binary-code-sfx-game-sounds-shorts-sfx-editing_b0djkZaa.m4a"
+);
+
+welcomeSound.volume = 0.8; // Volume: 0.0 to 1.0  
+welcomeSound.preload = "auto";
+
+function playBinarySound() {
+  binarySound.currentTime = 0; 
+
+  binarySound.play().catch(error => {
+    console.log("Binary sound playback failed:", error);
+  });
+}
+
+function stopBinarySound() {
+  binarySound.pause();
+  binarySound.currentTime = 0;
+}
+    
+(() => {
+  "use strict";
+
+  // =========================================
+  // SETTINGS — change these to tune the effect
+  // =========================================
+
+  const SETTINGS = {
+  particleCount: 3500,
+  sphereRadius: 5.0,
+
+    // Minimum camera distance = deepest zoom
+    zoomIn: 0.35,
+
+    // Maximum camera distance = pulled-back view
+    zoomOut: 12.0, 
+
+    // Larger = stronger rotation from fist movement
+    rotationSensitivity: 5.0,
+
+    // Lower = smoother movement
+    smoothness: 0.10,
+
+    // Point size
+    particleSize: 0.045
+  };
+
+  const mount = document.getElementById("universe");
+  const video = document.getElementById("cameraPreview");
+  const startBtn = document.getElementById("startBtn");
+  const enterBtn = document.getElementById("enterBtn");
+  const help = document.getElementById("help");
+  const welcomeMessage = document.getElementById("welcomeMessage");
+
+let welcomeDismissed = false;
+
+  const statusTitle = document.getElementById("statusTitle");
+  const statusText = document.getElementById("statusText");
+  const gestureText = document.getElementById("gesture");
+  const errorText = document.getElementById("errorText");
+  const targetHUD = document.getElementById("targetHUD");
+  const hudProgress = document.getElementById("hudProgress");
+  const targetLabel = document.getElementById("targetLabel");
+  const whiteFlash = document.getElementById("whiteFlash");
+
+  let renderer, scene, camera, planet;
+let outerSphere = null;
+let planetRotationSpeed = 0;
+  let hiddenWords = null;
+  // SCHOLAR SCANNING SYSTEM
+let scholarTargets = [];
+const scannedScholars = new Set();
+
+let scanPhase = "align";
+let currentScholar = null;
+let scanMessageUntil = 0;
+let scanSparkUntil = 0;
+
+const scholarMessage = document.getElementById("scholarMessage");
+const scholarMessageName = document.getElementById("scholarMessageName");
+const scholarMessageInfo = document.getElementById("scholarMessageInfo");
+const sparkBurst = document.getElementById("sparkBurst");
+  let activationState = "idle"; // idle, glow, approach, flash, complete
+  let lockStartedAt = 0;
+  let activationStartedAt = 0;
+  let textStartPosition = null;
+  let textStartScale = 1;
+  let textStartPointSize = 0.025;
+  let cameraBasePosition = null;
+  let activationLastTime = 0;
+
+// Inner sci-fi hologram rings that rotate independently.
+const rotatingTechRings = [];
+const sciFiOrbits = [];
+  let handTracker = null;
+  let cameraStream = null;
+  let running = false;
+  let processingFrame = false;
+
+  let targetZoom = 13.5;
+let currentZoom = 13.5;
+
+  let targetRotX = 0;
+  let targetRotY = 0;
+
+  let lastFist = null;
+  let lastHandCount = 0; 
+  let lastHandDistance = null;
+  let lastZoomTime = 0;
+  let twoHandsDetectedAt = 0;
+let smoothedSeparation = null;
+let initialSeparation = null;
+
+
+  let handResults = [];
+
+  // =========================================
+  // THREE.JS SCENE
+  // =========================================
+
+  function init3D() {
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x02040b);
+    scene.fog = new THREE.FogExp2(0x02040b, 0.012);
+
+    camera = new THREE.PerspectiveCamera(
+      65,
+      window.innerWidth / window.innerHeight,
+      0.01,
+      1000
+    );
+
+    camera.position.set(0, 0, targetZoom);
+
+    renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: false,
+      powerPreference: "high-performance"
+    });
+
+    renderer.setPixelRatio(
+      Math.min(window.devicePixelRatio || 1, 1.8)
+    );
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    mount.appendChild(renderer.domElement);
+
+    planet = new THREE.Group();
+    scene.add(planet);
+
+    createDotPlanet();
+    createBackgroundStars();
+
+    window.addEventListener("resize", resize);
+    animate();
+  }
+
+  // Generate points on the surface of a sphere.
+  // The camera can move through the sphere's interior.
+  function createDotPlanet() {
+    const count = SETTINGS.particleCount;
+    const radius = SETTINGS.sphereRadius;
+
+    const positions = new Float32Array(count * 3);
+    const colors = new Float32Array(count * 3);
+    const sizes = new Float32Array(count);
+
+    const colorA = new THREE.Color("#00eaff");
+    const colorB = new THREE.Color("#6b65ff");
+    const colorC = new THREE.Color("#e6ffff");
+
+    for (let i = 0; i < count; i++) {
+      // Uniformly distributed points over a sphere.
+      const u = Math.random() * 2 - 1;
+      const theta = Math.random() * Math.PI * 2;
+      const ring = Math.sqrt(1 - u * u);
+
+      const x = ring * Math.cos(theta);
+      const y = u;
+      const z = ring * Math.sin(theta);
+
+      // Slight variation creates a living particle shell.
+      const r = radius + (Math.random() - 0.5) * 0.28;
+
+      positions[i * 3] = x * r;
+      positions[i * 3 + 1] = y * r;
+      positions[i * 3 + 2] = z * r;
+
+      const mix = Math.random();
+      let color;
+
+      if (mix < 0.65) {
+        color = colorA.clone().lerp(colorB, Math.random() * 0.4);
+      } else if (mix < 0.92) {
+        color = colorB.clone().lerp(colorA, Math.random() * 0.3);
+      } else {
+        color = colorC;
+      }
+
+      colors[i * 3] = color.r;
+      colors[i * 3 + 1] = color.g;
+      colors[i * 3 + 2] = color.b;
+
+      sizes[i] = SETTINGS.particleSize *
+        (0.5 + Math.random() * 1.5);
+    }
+
+    const geometry = new THREE.BufferGeometry();
+
+    geometry.setAttribute(
+      "position",
+      new THREE.BufferAttribute(positions, 3)
+    );
+
+    geometry.setAttribute(
+      "color",
+      new THREE.BufferAttribute(colors, 3)
+    );
+
+    geometry.setAttribute(
+      "size",
+      new THREE.BufferAttribute(sizes, 1)
+    );
+
+    const material = new THREE.PointsMaterial({
+      size: SETTINGS.particleSize,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.95,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      sizeAttenuation: true
+    });
+
+    const points = new THREE.Points(geometry, material);
+planet.add(points);
+
+// Reference only the outer spherical shell
+outerSphere = points;
+
+    // Inner particles
+createInnerDust();
+
+// Hidden 3D text puzzle
+createHiddenText();
+
+// Yellow Islamic science scholar names
+createScholarTexts();
+
+// Iron Man-style sci-fi orbital rings
+createSciFiOrbits();
+
+// Huge rotating circle on the opposite planet wall
+createBackWallCircle();
+  }
+
+  function createInnerDust() {
+  const count = 500;
+  const innerLimit = SETTINGS.sphereRadius - 0.65;
+
+  const positions = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
+  const pointsList = [];
+
+  const cyan = new THREE.Color("#35eaff");
+  const blue = new THREE.Color("#6677ff");
+  const violet = new THREE.Color("#b26bff");
+  const white = new THREE.Color("#eaffff");
+
+  // -----------------------------------------
+  // 1. RANDOM 3D CONSTELLATION DOTS
+  // -----------------------------------------
+  // Distribute dots throughout the inner volume.
+  // All dots stay safely inside the planet shell.
+
+  for (let i = 0; i < count; i++) {
+    const u = Math.random() * 2 - 1;
+    const theta = Math.random() * Math.PI * 2;
+    const ring = Math.sqrt(1 - u * u);
+
+    const direction = new THREE.Vector3(
+      ring * Math.cos(theta),
+      u,
+      ring * Math.sin(theta)
+    );
+
+    // Vary depth while keeping the centre populated.
+    const radius = 0.25 +
+      Math.pow(Math.random(), 0.78) * (innerLimit - 0.25);
+
+    const point = direction.multiplyScalar(radius);
+    pointsList.push(point);
+
+    positions[i * 3] = point.x;
+    positions[i * 3 + 1] = point.y;
+    positions[i * 3 + 2] = point.z;
+
+    const colorChoice = Math.random();
+    let color;
+
+    if (colorChoice < 0.48) {
+      color = cyan;
+    } else if (colorChoice < 0.73) {
+      color = blue;
+    } else if (colorChoice < 0.91) {
+      color = violet;
+    } else {
+      color = white;
+    }
+
+    colors[i * 3] = color.r;
+    colors[i * 3 + 1] = color.g;
+    colors[i * 3 + 2] = color.b;
+  }
+
+  const dotGeometry = new THREE.BufferGeometry();
+
+  dotGeometry.setAttribute(
+    "position",
+    new THREE.BufferAttribute(positions, 3)
+  );
+
+  dotGeometry.setAttribute(
+    "color",
+    new THREE.BufferAttribute(colors, 3)
+  );
+
+  const dotMaterial = new THREE.PointsMaterial({
+  size: 0.045,
+  vertexColors: true,
+  transparent: true,
+  opacity: 0.75,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+  sizeAttenuation: true
+});
+
+  planet.add(new THREE.Points(dotGeometry, dotMaterial));
+
+  // -----------------------------------------
+  // 2. CONNECT DOTS INTO 3D CONSTELLATIONS
+  // -----------------------------------------
+  // Connect each dot to its two nearest neighbours.
+  // This creates an irregular network, not a flat web.
+
+  const linePositions = [];
+  const connectedPairs = new Set();
+
+  for (let i = 0; i < count; i++) {
+    let nearest = [];
+
+    for (let j = 0; j < count; j++) {
+      if (i === j) continue;
+
+      const distance = pointsList[i].distanceTo(pointsList[j]);
+
+      if (distance < 0.85) {
+  nearest.push({ index: j, distance });
+}
+    }
+
+    nearest.sort((a, b) => a.distance - b.distance);
+    nearest = nearest.slice(0, 1);
+
+    for (const neighbour of nearest) {
+      const a = Math.min(i, neighbour.index);
+      const b = Math.max(i, neighbour.index);
+      const key = `${a}-${b}`;
+
+      if (connectedPairs.has(key)) continue;
+      connectedPairs.add(key);
+
+      const p1 = pointsList[a];
+      const p2 = pointsList[b];
+
+      linePositions.push(
+        p1.x, p1.y, p1.z,
+        p2.x, p2.y, p2.z
+      );
+    }
+  }
+
+  const lineGeometry = new THREE.BufferGeometry();
+
+  lineGeometry.setAttribute(
+    "position",
+    new THREE.Float32BufferAttribute(linePositions, 3)
+  );
+
+  const lineMaterial = new THREE.LineBasicMaterial({
+    color: 0x36dfff,
+    transparent: true,
+    opacity: 0.22,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+
+  planet.add(
+    new THREE.LineSegments(lineGeometry, lineMaterial)
+  );
+
+  // -----------------------------------------
+  // 3. ROTATING SCI-FI HOLOGRAM RINGS
+  // -----------------------------------------
+  // Each ring assembly sits at a different 3D position.
+  // Its circular plane faces inward toward the planet centre.
+
+  const ringCount = 12;
+
+for (let i = 0; i < ringCount; i++) { 
+  const u = Math.random() * 2 - 1;
+  const theta = Math.random() * Math.PI * 2;
+  const ring = Math.sqrt(1 - u * u);
+
+  const direction = new THREE.Vector3(
+    ring * Math.cos(theta),
+    u,
+    ring * Math.sin(theta)
+  );
+
+  // Most rings near the planet wall.
+  // A few rings sit at the middle radius.
+  // Keep the centre mostly clear.
+  let distanceFromCenter;
+
+  const placement = Math.random();
+
+  if (placement < 0.65) {
+    // 65% near the inner wall
+    distanceFromCenter = 3.5 + Math.random() * 0.65;
+  } else {
+    // 35% around the middle radius
+    distanceFromCenter = 2.3 + Math.random() * 0.7;
+  }
+
+  const ringPosition = direction.multiplyScalar(distanceFromCenter);
+
+  const anchor = new THREE.Group();
+  anchor.position.copy(ringPosition);
+  planet.add(anchor);
+
+  // Each ring faces the planet centre.
+  anchor.lookAt(0, 0, 0);
+
+  const spinner = new THREE.Group();
+  anchor.add(spinner);
+
+  const radius = 0.30 + Math.random() * 0.40;
+  const tube = 0.012 + Math.random() * 0.009;
+
+  const ringColor = i % 3 === 0
+    ? 0xb26bff
+    : i % 3 === 1
+      ? 0x36eaff
+      : 0x6688ff;
+
+  const mainRing = new THREE.Mesh(
+    new THREE.TorusGeometry(radius, tube, 6, 72),
+    new THREE.MeshBasicMaterial({
+      color: ringColor,
+      transparent: true,
+      opacity: 0.8,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    })
+  );
+
+  spinner.add(mainRing);
+
+  const arc = new THREE.Mesh(
+    new THREE.TorusGeometry(
+      radius * 0.72,
+      tube * 0.65,
+      5,
+      56,
+      Math.PI * (0.65 + Math.random() * 0.8)
+    ),
+    new THREE.MeshBasicMaterial({
+      color: 0xe7fcff,
+      transparent: true,
+      opacity: 0.85,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    })
+  );
+
+  arc.rotation.z = Math.random() * Math.PI * 2;
+  spinner.add(arc);
+
+  const markerGeometry = new THREE.SphereGeometry(0.025, 6, 6);
+
+  for (let marker = 0; marker < 4; marker++) {
+    const angle = marker * Math.PI / 2;
+
+    const dot = new THREE.Mesh(
+      markerGeometry,
+      new THREE.MeshBasicMaterial({
+        color: 0xc8faff,
+        transparent: true,
+        opacity: 0.95,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      })
+    );
+
+    dot.position.set(
+      Math.cos(angle) * radius,
+      Math.sin(angle) * radius,
+      0
+    );
+
+    spinner.add(dot);
+  }
+
+  rotatingTechRings.push({
+    spinner,
+    speed: (0.15 + Math.random() * 0.4) *
+      (Math.random() < 0.5 ? -1 : 1),
+    tiltSpeed: (Math.random() - 0.5) * 0.12
+  });
+}
+}
+  
+  
+
+function createSciFiOrbits() {
+  const orbitCount = 9;
+
+  const colors = [
+    0x39eaff,
+    0x168bff,
+    0x8c6bff,
+    0xc5faff,
+    0xff6b35
+  ];
+
+  for (let i = 0; i < orbitCount; i++) {
+    const orbit = new THREE.Group();
+
+    // Different orbital sizes, all outside the planet shell.
+    const radius = 5.8 + Math.random() * 4.5;
+
+    // Tilt each orbit in a different 3D direction.
+    orbit.rotation.set(
+      Math.random() * Math.PI,
+      Math.random() * Math.PI,
+      Math.random() * Math.PI
+    );
+
+    // IMPORTANT: Child of planet, so it follows hand-controlled rotation.
+    planet.add(orbit);
+
+    const color = colors[
+      Math.floor(Math.random() * colors.length)
+    ];
+
+    // Main thin metallic energy loop.
+    const mainRing = new THREE.Mesh(
+      new THREE.TorusGeometry(radius, 0.012 + Math.random() * 0.018, 6, 180),
+      new THREE.MeshBasicMaterial({
+        color,
+        transparent: true,
+        opacity: 0.24 + Math.random() * 0.25,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      })
+    );
+
+    orbit.add(mainRing);
+
+    // Broken outer ring segments for a futuristic mechanical look.
+    const segmentCount = 3 + Math.floor(Math.random() * 4);
+
+    for (let j = 0; j < segmentCount; j++) {
+      const startAngle = Math.random() * Math.PI * 2;
+      const arcLength = 0.12 + Math.random() * 0.5;
+
+      const arc = new THREE.Mesh(
+        new THREE.TorusGeometry(
+          radius,
+          0.025 + Math.random() * 0.025,
+          5,
+          48,
+          arcLength
+        ),
+        new THREE.MeshBasicMaterial({
+          color: j % 3 === 0 ? 0xffffff : color,
+          transparent: true,
+          opacity: 0.35 + Math.random() * 0.4,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false
+        })
+      );
+
+      arc.rotation.z = startAngle;
+      orbit.add(arc);
+    }
+
+    // Small illuminated orbital markers.
+    const markerCount = 2 + Math.floor(Math.random() * 5);
+
+    for (let j = 0; j < markerCount; j++) {
+      const angle = Math.random() * Math.PI * 2;
+      const markerSize = 0.025 + Math.random() * 0.055;
+
+      const marker = new THREE.Mesh(
+        new THREE.SphereGeometry(markerSize, 8, 8),
+        new THREE.MeshBasicMaterial({
+          color: 0xcafaff,
+          transparent: true,
+          opacity: 0.75,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false
+        })
+      );
+
+      marker.position.set(
+        Math.cos(angle) * radius,
+        Math.sin(angle) * radius,
+        0
+      );
+
+      orbit.add(marker);
+    }
+
+    // A few tiny technical tick marks around the ring.
+    for (let j = 0; j < 28; j++) {
+      if (Math.random() > 0.35) continue;
+
+      const angle = (j / 28) * Math.PI * 2;
+
+      const tick = new THREE.Mesh(
+        new THREE.BoxGeometry(0.10, 0.018, 0.012),
+        new THREE.MeshBasicMaterial({
+          color,
+          transparent: true,
+          opacity: 0.45,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false
+        })
+      );
+
+      tick.position.set(
+        Math.cos(angle) * radius,
+        Math.sin(angle) * radius,
+        0
+      );
+
+      tick.rotation.z = angle;
+      orbit.add(tick);
+    }
+
+    // Distant orbits should be faint and softly blurred.
+    // Smaller values push them farther back visually.
+    const distant = radius > 8.0;
+
+    orbit.scale.setScalar(
+      distant ? 0.94 + Math.random() * 0.08 : 1
+    );
+
+    orbit.traverse(object => {
+      if (!object.material) return;
+
+      object.material.opacity *= distant ? 0.55 : 1;
+
+      // Keep the fine distant details subtle.
+      if (object.geometry && object.material.color) {
+        object.material.needsUpdate = true;
+      }
+    });
+
+    
+    // Give each outer orbit its own movement speed. 
+    orbit.userData.orbitSpeed =
+  (0.001 + Math.random() * 0.002) *
+  (Math.random() < 0.5 ? -1 : 1);
+
+    // Store the orbit separately so its parts move together.
+    sciFiOrbits.push({
+      group: orbit,
+      speed: orbit.userData.orbitSpeed
+    });
+
+  }
+}
+
+
+
+function createBackWallCircle() {
+  const backCircle = new THREE.Group();
+
+  // Position it on the wall opposite the starting camera.
+  backCircle.position.set(0, 0, -4.75);
+
+  // Face the circle toward the starting camera at +Z.
+  backCircle.rotation.y = Math.PI;
+
+  // Attach to the planet so it follows planet rotation.
+  planet.add(backCircle);
+
+  // Large outer cyan circle.
+  const outerRing = new THREE.Mesh(
+    new THREE.TorusGeometry(2.8, 0.035, 8, 180),
+    new THREE.MeshBasicMaterial({
+      color: 0x00eaff,
+      transparent: true,
+      opacity: 0.95,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    })
+  );
+  backCircle.add(outerRing);
+
+  // Inner gold circle.
+  const innerRing = new THREE.Mesh(
+    new THREE.TorusGeometry(2.35, 0.018, 8, 160),
+    new THREE.MeshBasicMaterial({
+      color: 0xffd700,
+      transparent: true,
+      opacity: 0.9,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    })
+  );
+  backCircle.add(innerRing);
+
+  // Broken rotating energy ring.
+  const energyRing = new THREE.Mesh(
+    new THREE.TorusGeometry(
+      2.6, 0.06, 6, 180, Math.PI * 1.35
+    ),
+    new THREE.MeshBasicMaterial({
+      color: 0x8c6bff,
+      transparent: true,
+      opacity: 0.9,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    })
+  );
+  energyRing.rotation.z = Math.PI * 0.25;
+  backCircle.add(energyRing);
+
+  // Small illuminated markers around the circumference.
+  for (let i = 0; i < 24; i++) {
+    const angle = (i / 24) * Math.PI * 2;
+    const marker = new THREE.Mesh(
+      new THREE.SphereGeometry(0.045, 8, 8),
+      new THREE.MeshBasicMaterial({
+        color: i % 3 === 0 ? 0xffd700 : 0x9ffaff,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      })
+    );
+
+    marker.position.set(
+      Math.cos(angle) * 2.8,
+      Math.sin(angle) * 2.8,
+      0
+    );
+
+    backCircle.add(marker);
+  }
+
+  // Store it for independent animation.
+  backCircle.userData.energyRing = energyRing;
+  backCircle.userData.rotationSpeed = 0.008;
+
+  window.backWallCircle = backCircle;
+}
+
+
+
+function createHiddenText() {
+  // =========================================
+  // MINGGU STEM — SOLID HOLOGRAPHIC TEXT
+  // =========================================
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 1600;
+  canvas.height = 440;
+
+  const ctx = canvas.getContext("2d");
+
+  // Transparent background
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  // Main title: glowing cyan with gold highlights
+  ctx.save();
+  ctx.font = "900 170px Arial";
+  ctx.shadowColor = "#00eaff";
+  ctx.shadowBlur = 35;
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = "#ffffff";
+  ctx.strokeText("MINGGU STEM", 800, 165);
+
+  const titleGradient = ctx.createLinearGradient(0, 70, 0, 260);
+  titleGradient.addColorStop(0, "#ffffff");
+  titleGradient.addColorStop(0.25, "#bfffff");
+  titleGradient.addColorStop(0.55, "#00eaff");
+  titleGradient.addColorStop(0.82, "#498aff");
+  titleGradient.addColorStop(1, "#c88aff");
+
+  ctx.shadowBlur = 22;
+  ctx.fillStyle = titleGradient;
+  ctx.fillText("MINGGU STEM", 800, 165);
+  ctx.restore();
+
+  // Gold separator line
+  const lineGradient = ctx.createLinearGradient(280, 0, 1320, 0);
+  lineGradient.addColorStop(0, "rgba(255,215,0,0)");
+  lineGradient.addColorStop(0.5, "#ffd700");
+  lineGradient.addColorStop(1, "rgba(255,215,0,0)");
+
+  ctx.save();
+  ctx.shadowColor = "#ffd700";
+  ctx.shadowBlur = 18;
+  ctx.fillStyle = lineGradient;
+  ctx.fillRect(280, 285, 1040, 4);
+  ctx.restore();
+
+  // School name
+  ctx.save();
+  ctx.font = "bold 65px Arial";
+  ctx.letterSpacing = "9px";
+  ctx.fillStyle = "#ffffff";
+  ctx.shadowColor = "#00eaff";
+  ctx.shadowBlur = 18;
+  ctx.fillText("SR AR RAUDHAH", 800, 355);
+
+  ctx.font = "bold 34px Arial";
+  ctx.letterSpacing = "12px";
+  ctx.fillStyle = "#ffd700";
+  ctx.shadowColor = "#ffd700";
+  ctx.shadowBlur = 12;
+  ctx.fillText("SCIENCE • TECHNOLOGY • INNOVATION", 800, 410);
+  ctx.restore();
+
+  // Convert canvas to a high-quality texture
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 8;
+
+  // A real solid surface instead of particle dots
+  const geometry = new THREE.PlaneGeometry(4.5, 1.25);
+
+  const material = new THREE.MeshBasicMaterial({
+    map: texture,
+    color: 0xffffff,
+    transparent: true,
+    opacity: 1,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+    toneMapped: false
+  });
+
+  // Keep compatibility with the existing finale code
+  // that reads and changes hiddenWords.material.size.
+  material.size = 0.025;
+
+  hiddenWords = new THREE.Mesh(geometry, material);
+
+  // Spawn MINGGU STEM + logo + rings at the centre
+// of the four scholar positions.
+hiddenWords.visible = false;
+hiddenWords.position.set(0, 3.5, 2.7);
+hiddenWords.lookAt(0, 0, 0);
+
+  planet.add(hiddenWords);
+
+  // =========================================
+  // SCHOOL LOGO — BEHIND THE TEXT
+  // =========================================
+
+  const logoTexture = new THREE.TextureLoader().load(
+    "https://raw.githubusercontent.com/julf95/classroom/main/Logo%20Raudhah.png"
+  );
+
+  logoTexture.colorSpace = THREE.SRGBColorSpace;
+
+  const logoMaterial = new THREE.MeshBasicMaterial({
+    map: logoTexture,
+    transparent: true,
+    opacity: 0.85,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+    toneMapped: false
+  });
+
+  const logoGeometry = new THREE.PlaneGeometry(2.6, 2.6);
+  const stemLogo = new THREE.Mesh(logoGeometry, logoMaterial);
+
+  stemLogo.position.z = -0.18;
+  hiddenWords.add(stemLogo);
+  hiddenWords.userData.stemLogo = stemLogo;
+
+  // =========================================
+  // RED + GOLD ROTATING HOLOGRAM RINGS
+  // =========================================
+
+  const stemRings = new THREE.Group();
+  hiddenWords.add(stemRings);
+
+  const redRing = new THREE.Mesh(
+    new THREE.RingGeometry(1.5, 1.58, 128),
+    new THREE.MeshBasicMaterial({
+      color: 0xff2020,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.95,
+      depthWrite: false
+    })
+  );
+
+  const yellowRing = new THREE.Mesh(
+    new THREE.RingGeometry(1.2, 1.26, 128),
+    new THREE.MeshBasicMaterial({
+      color: 0xffd700,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.95,
+      depthWrite: false
+    })
+  );
+
+  stemRings.add(redRing);
+  stemRings.add(yellowRing);
+
+  hiddenWords.userData.stemRings = stemRings;
+}
+
+
+
+
+
+function createScholarTexts() {
+  const scholars = [
+    {
+      name: "AL-KHAWARIZMI",
+      displayName: "AL-KHAWARIZMI✅",
+      message: "📜ULAMA YANG MENCIPTA\nALGEBRA DAN MATEMATIK"
+    },
+    {
+      name: "IBNU AL-HAYTHAM",
+      displayName: "IBNU AL-HAYTHAM✅",
+      message: "📜ULAMA YANG MENGKAJI\nSAINS OPTIK DAN CAHAYA"
+    },
+    {
+      name: "IBNU SINA",
+      displayName: "IBNU SINA✅",
+      message: "📜ULAMA YANG TERKENAL DALAM\nILMU SAINS PERUBATAN"
+    },
+    {
+      name: "AL-BIRUNI",
+      displayName: "AL BIRUNI✅",
+      message: "📜ULAMA YANG TERKENAL DALAM\nILMU ASTRONOMI DAN MATEMATIK"
+    }
+  ]; 
+
+  const yellowColors = [
+    "#ffe600",
+    "#ffbf00",
+    "#fff176",
+    "#ffd54f"
+  ];
+
+  scholars.forEach((scholar, index) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1000;
+    canvas.height = 180;
+
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = "900 76px Arial";
+    ctx.fillText(scholar.name, 500, 90);
+
+    const pixels = ctx.getImageData(
+      0, 0, canvas.width, canvas.height
+    ).data;
+
+    const positions = [];
+    const colors = [];
+    const scale = 0.0032;
+
+    for (let y = 0; y < canvas.height; y += 3) {
+      for (let x = 0; x < canvas.width; x += 3) {
+        const pixelIndex = (y * canvas.width + x) * 4;
+
+        if (pixels[pixelIndex + 3] > 100) {
+          const px = (x - 500) * scale;
+          const py = (90 - y) * scale;
+          const pz = (Math.random() - 0.5) * 0.12;
+
+          positions.push(
+            px + (Math.random() - 0.5) * 0.008,
+            py + (Math.random() - 0.5) * 0.008,
+            pz
+          );
+
+          const color = new THREE.Color(
+            yellowColors[
+              Math.floor(Math.random() * yellowColors.length)
+            ]
+          );
+
+          colors.push(color.r, color.g, color.b);
+        }
+      }
+    }
+
+    const geometry = new THREE.BufferGeometry();
+
+    geometry.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(positions, 3)
+    );
+
+    geometry.setAttribute(
+      "color",
+      new THREE.Float32BufferAttribute(colors, 3)
+    );
+
+    const material = new THREE.PointsMaterial({
+      size: 0.025,
+      vertexColors: true,
+      transparent: true,
+      opacity: 1,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      sizeAttenuation: true
+    });
+
+    const text = new THREE.Points(geometry, material);
+
+    
+
+const scholarAngle = THREE.MathUtils.degToRad(30);
+const scholarRadius = 2.7;
+
+const scholarPositions = [
+  new THREE.Vector3(
+    0,
+    scholarRadius * Math.sin(scholarAngle),
+    scholarRadius * Math.cos(scholarAngle)
+  ), // NORTH — 30° above centre
+
+  new THREE.Vector3(
+    scholarRadius * Math.sin(scholarAngle),
+    0,
+    scholarRadius * Math.cos(scholarAngle)
+  ), // EAST — 30° right of centre
+
+  new THREE.Vector3(
+    0,
+    -scholarRadius * Math.sin(scholarAngle),
+    scholarRadius * Math.cos(scholarAngle)
+  ), // SOUTH — 30° below centre
+
+  new THREE.Vector3(
+    -scholarRadius * Math.sin(scholarAngle),
+    0,
+    scholarRadius * Math.cos(scholarAngle)
+  ) // WEST — 30° left of centre
+];
+
+text.position.copy(scholarPositions[index]);
+text.lookAt(0, 0, 0);
+
+
+// Face the text toward the planet centre.
+text.lookAt(0, 0, 0);
+
+
+    planet.add(text);
+
+    // Store each scholar as a separate scan target.
+    scholarTargets.push({
+      name: scholar.name,
+      displayName: scholar.displayName,
+      message: scholar.message,
+      object: text,
+      scanned: false
+    });
+  });
+}
+
+
+ 
+  function createBackgroundStars() { 
+    const count = 900;
+    const positions = new Float32Array(count * 3);
+
+    for (let i = 0; i < count; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 180;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 180;
+      positions[i * 3 + 2] = -30 - Math.random() * 130;
+    }
+
+    const geometry = new THREE.BufferGeometry();
+
+    geometry.setAttribute(
+      "position",
+      new THREE.BufferAttribute(positions, 3)
+    );
+
+    const material = new THREE.PointsMaterial({
+      color: 0x648cbf,
+      size: 0.10,
+      transparent: true,
+      opacity: 0.6,
+      sizeAttenuation: true
+    });
+
+    scene.add(new THREE.Points(geometry, material));
+  }
+
+  function resize() {
+    if (!camera || !renderer) return;
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  // =========================================
+  // ANIMATION
+  // =========================================
+
+
+  // =========================================
+  // CENTRE HUD TARGET LOCK + CINEMATIC FINALE
+  // =========================================
+  function isTextAlignedWithHUD(targetObject) {
+  if (!targetObject || !camera || !planet) return false;
+
+  camera.updateMatrixWorld();
+  planet.updateMatrixWorld(true);
+
+  const textWorld = new THREE.Vector3();
+  targetObject.getWorldPosition(textWorld);
+
+  const projected = textWorld.clone().project(camera);
+
+  if (projected.z < -1 || projected.z > 1) return false;
+
+  if (
+    Math.abs(projected.x) > 0.14 ||
+    Math.abs(projected.y) > 0.20
+  ) {
+    return false;
+  }
+
+  const textNormal = new THREE.Vector3();
+  targetObject.getWorldDirection(textNormal);
+
+  const cameraWorld = new THREE.Vector3();
+  camera.getWorldPosition(cameraWorld);
+
+  const toCamera = cameraWorld.sub(textWorld).normalize();
+
+  return Math.abs(textNormal.dot(toCamera)) > 0.48;
+}
+
+function createScanSparks() {
+  sparkBurst.replaceChildren();
+
+  for (let i = 0; i < 38; i++) {
+    const spark = document.createElement("span");
+    spark.className = "scan-spark";
+
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 50 + Math.random() * 180;
+
+    spark.style.setProperty(
+      "--dx",
+      `${Math.cos(angle) * distance}px`
+    );
+
+    spark.style.setProperty(
+      "--dy",
+      `${Math.sin(angle) * distance}px`
+    );
+
+    spark.style.width = `${2 + Math.random() * 4}px`;
+    spark.style.height = spark.style.width;
+
+    sparkBurst.appendChild(spark);
+  }
+
+  setTimeout(() => sparkBurst.replaceChildren(), 850);
+}
+
+function showScholarMessage(scholar, now) {
+  currentScholar = scholar;
+  scanPhase = "message";
+  playScholarScanSound();
+  scanMessageUntil = now + 2500; 
+
+  scholarMessageName.textContent = scholar.displayName;
+  scholarMessageInfo.textContent = scholar.message;
+
+  scholarMessage.classList.remove("hidden", "pop-up");
+
+    // Restart the animation for every new scholar
+    void scholarMessage.offsetWidth;
+    
+    scholarMessage.classList.add("pop-up");
+
+  targetHUD.classList.remove("locking");
+  targetHUD.classList.add("locked");
+  targetLabel.textContent = "SCHOLAR IDENTIFIED";
+
+  hudProgress.style.strokeDashoffset = "0";
+
+  statusTitle.textContent = "SCHOLAR IDENTIFIED";
+  statusText.textContent = scholar.displayName;
+  gestureText.textContent = "KNOWLEDGE UNLOCKED";
+}
+
+function updateTargetLock(now) {
+  // Do not allow any scanning before the welcome message is dismissed.
+    if (!welcomeDismissed || activationState !== "idle") {
+    lockStartedAt = 0;
+    hudProgress.style.strokeDashoffset = "282.74";
+    targetHUD.classList.remove("locking", "locked");
+    targetLabel.textContent = "DISMISS WELCOME FIRST";
+    return;
+  }
+
+  // DISABLE SCANNING WHEN OUTSIDE THE PLANET
+  const distanceFromPlanet = camera.position.length();
+
+  if (distanceFromPlanet > SETTINGS.sphereRadius) {
+    lockStartedAt = 0;
+    currentScholar = null;
+
+    hudProgress.style.strokeDashoffset = "282.74";
+    targetHUD.classList.remove("locking", "locked");
+    targetLabel.textContent = "ENTER THE PLANET TO SCAN";
+
+    return;
+  }
+
+  // Keep the scholar information visible for exactly 4 seconds.
+  if (scanPhase === "message") {
+    if (now >= scanMessageUntil) {
+      scholarMessage.classList.add("hidden");
+      createScanSparks();
+
+      scanPhase = "sparks";
+      scanSparkUntil = now + 750;
+
+      statusTitle.textContent = "SCAN COMPLETE";
+      statusText.textContent = "Scholar dissolving...";
+      targetLabel.textContent = "ENERGY RELEASE";
+    }
+
+    return;
+  }
+
+  // Let the spark burst finish before removing the scholar.
+  if (scanPhase === "sparks") {
+    if (now >= scanSparkUntil) {
+      if (currentScholar) {
+        planet.remove(currentScholar.object);
+
+        currentScholar.object.geometry.dispose();
+        currentScholar.object.material.dispose();
+
+        currentScholar.scanned = true;
+            scannedScholars.add(currentScholar.name);
+            
+            // Turn progress circles green from left to right,
+            // regardless of which scholar is scanned.
+            const progressDots = document.querySelectorAll(
+              "#scholarProgress .scholar-dot"
+            ); 
+            
+            const scannedCount = scannedScholars.size;
+            
+            progressDots.forEach((dot, index) => {
+              dot.classList.toggle("scanned", index < scannedCount);
+            });
+      }
+
+      currentScholar = null;
+      scanPhase = "align";
+      lockStartedAt = 0;
+
+      hudProgress.style.strokeDashoffset = "282.74";
+      targetHUD.classList.remove("locking", "locked");
+
+      const total = scholarTargets.length;
+      const completed = scannedScholars.size;
+
+      if (completed === total) {
+          
+          // Show success message after all 4 scholars are scanned.
+          document.getElementById("scanSuccessMessage").classList.add("show");
+        
+          // Play Sokolov's Elixir sound when the text appears.
+            playElixirSound();
+          
+          // Reveal MINGGU STEM only after all scholars are removed.
+          hiddenWords.visible = true;
+        
+          statusTitle.textContent = "ALL SCHOLARS SCANNED";
+          statusText.textContent = "MINGGU STEM unlocked";
+          targetLabel.textContent = "FINAL TARGET UNLOCKED";
+          gestureText.textContent = "ALIGN MINGGU STEM TO LOCK";
+        
+        } else {
+        statusTitle.textContent = "NEXT SCHOLAR";
+        statusText.textContent = `${completed} / ${total} scanned`;
+        targetLabel.textContent = "FIND NEXT SCHOLAR";
+        gestureText.textContent = "ALIGN A YELLOW SCHOLAR NAME";
+      }
+    }
+
+    return;
+  }
+
+  // Before the final unlock, only the unscanned scholars are targets.
+  const remainingScholars = scholarTargets.filter(
+    scholar => !scholar.scanned
+  );
+
+  let alignedScholar = null;
+
+  for (const scholar of remainingScholars) {
+    if (isTextAlignedWithHUD(scholar.object)) {
+      alignedScholar = scholar;
+      break;
+    }
+  }
+
+  // All four scholars must be removed before MINGGU STEM can lock.
+  const allScholarsScanned =
+    scannedScholars.size === scholarTargets.length;
+
+  const finalAligned =
+    allScholarsScanned && isTextAlignedWithHUD(hiddenWords);
+
+  let targetObject = null;
+
+  if (alignedScholar) {
+    targetObject = alignedScholar.object;
+  } else if (finalAligned) {
+    targetObject = hiddenWords;
+  }
+
+  if (targetObject) {
+    if (!lockStartedAt) {
+      lockStartedAt = now;
+      currentScholar = alignedScholar;
+    }
+
+    // If the aligned target changes, restart the timer.
+    if (
+      alignedScholar &&
+      currentScholar !== alignedScholar
+    ) {
+      currentScholar = alignedScholar;
+      lockStartedAt = now;
+    }
+
+    const progress = Math.min(
+      1,
+      (now - lockStartedAt) / 2500
+    );
+
+    hudProgress.style.strokeDashoffset =
+      String(282.74 * (1 - progress));
+ 
+    targetHUD.classList.add("locking");
+    targetHUD.classList.remove("locked");
+
+    targetLabel.textContent =
+      "SCANNING " + Math.round(progress * 100) + "%";
+
+    statusTitle.textContent = "TARGET ACQUIRED";
+    statusText.textContent = alignedScholar
+      ? alignedScholar.displayName
+      : "MINGGU STEM 2026";
+
+    gestureText.textContent = "HOLD POSITION — SCANNING";
+
+    if (progress >= 1) {
+      if (alignedScholar) {
+        showScholarMessage(alignedScholar, now);
+      } else if (finalAligned) {
+        // The existing cinematic finale remains unchanged.
+        beginActivation(now);
+      }
+    }
+
+  } else {
+    lockStartedAt = 0;
+    currentScholar = null;
+
+    hudProgress.style.strokeDashoffset = "282.74";
+    targetHUD.classList.remove("locking", "locked");
+
+    if (!allScholarsScanned) {
+      targetLabel.textContent = "ALIGN SCHOLAR TO SCAN";
+    } else {
+      targetLabel.textContent = "ALIGN MINGGU STEM TO LOCK";
+    }
+  }
+}
+
+  function beginActivation(now) {
+    activationState = "glow";
+    playMarvelFinal40();
+    activationStartedAt = now;
+    playBinarySound();
+    // Play the second sound 0.5 seconds later.
+setTimeout(() => {
+  playLogoScanFinishSound();
+}, 500);
+    activationLastTime = now;
+    textStartPosition = hiddenWords.position.clone();
+    textStartScale = hiddenWords.scale.x;
+    textStartPointSize = hiddenWords.material.size;
+    cameraBasePosition = camera.position.clone();
+    targetHUD.classList.add("locked");
+    targetLabel.textContent = "TARGET LOCKED";
+    document.body.classList.add("activation-running");
+    statusTitle.textContent = "ENERGY DETECTED";
+    statusText.textContent = "Activation sequence initiated";
+    gestureText.textContent = "CONTROLS LOCKED";
+    targetZoom = currentZoom;
+    targetRotX = planet.rotation.x;
+    targetRotY = planet.rotation.y;
+  }
+
+  function updateActivation(now) {
+    if (activationState === "idle" || activationState === "complete") return;
+    const elapsed = now - activationStartedAt;
+
+    if (activationState === "glow") {
+  const t = Math.min(1, elapsed / 1300);
+  const eased = t;
+
+  // OUTER PLANET: smoothly accelerate during text glow
+  const maxRotationSpeed = 1.8; // radians per second
+  planetRotationSpeed = maxRotationSpeed * eased * eased;
+
+  if (outerSphere) {
+    outerSphere.rotation.y +=
+      planetRotationSpeed * (1 / 60);
+
+    outerSphere.rotation.x +=
+      planetRotationSpeed * 0.12 * (1 / 60);
+  }
+      // SUN-INTENSITY LETTER GLOW
+hiddenWords.material.size =
+  textStartPointSize * (1 + eased * 9.0);
+
+hiddenWords.material.opacity = 1;
+
+// White-hot core shifting toward solar gold
+// Keep the text crisp while intensifying its brightness.
+const glow = 1 + eased * 2;
+
+hiddenWords.material.color.setRGB(
+  glow,
+  glow,
+  glow
+);
+
+hiddenWords.scale.setScalar(
+  textStartScale * (1 + eased * 0.4) 
+);
+      if (t >= 1) {
+  activationState = "flash";
+  activationStartedAt = now;
+
+  whiteFlash.classList.add("active");
+
+  statusTitle.textContent = "SEQUENCE COMPLETE";
+  statusText.textContent = "MINGGU STEM 2026";
+}
+      return;
+    }
+
+    if (activationState === "approach") { 
+      const t = Math.min(1, elapsed / 1000);
+      const eased = t * t * (3 - 2 * t);
+      const deltaSeconds = Math.min(0.05, Math.max(0, (now - activationLastTime) / 1000));
+      activationLastTime = now;
+
+      // Move the text toward the camera in planet-local coordinates.
+      const textWorld = new THREE.Vector3();
+      const cameraWorld = new THREE.Vector3();
+      hiddenWords.getWorldPosition(textWorld);
+      camera.getWorldPosition(cameraWorld);
+      const towardCameraWorld = cameraWorld.sub(textWorld).normalize();
+      const planetWorldQuaternion = new THREE.Quaternion();
+      planet.getWorldQuaternion(planetWorldQuaternion);
+      const towardCameraLocal = towardCameraWorld
+        .applyQuaternion(planetWorldQuaternion.invert()).normalize();
+
+      // Letters rush toward the viewer, then stop before the camera.
+// Move the letters toward the camera (your eyes).
+const textWorldPos = new THREE.Vector3();
+const cameraWorldPos = new THREE.Vector3();
+
+hiddenWords.getWorldPosition(textWorldPos);
+camera.getWorldPosition(cameraWorldPos);
+ 
+const distanceToEyes = textWorldPos.distanceTo(cameraWorldPos);
+const stopDistance = 1.2;
+const moveSpeed = 2.5;
+
+if (distanceToEyes > stopDistance) {
+  // Constant-speed movement; do not ease down near the camera
+  const step = moveSpeed * deltaSeconds;
+
+  hiddenWords.position.addScaledVector(
+    towardCameraLocal,
+    Math.min(step, distanceToEyes - stopDistance)
+  );
+}
+
+// Grow toward the screen without becoming excessively huge.
+hiddenWords.scale.setScalar(
+  textStartScale * (1.45 + eased * 2.0)
+);
+
+// Keep the letters bright and readable.
+hiddenWords.material.size =
+  textStartPointSize * (3.4 + eased * 1.0); 
+      hiddenWords.material.opacity = 1;
+
+      // Cinematic camera shake grows as the text rushes forward.
+      const shake = 0.008 + eased * 0.055;
+      camera.position.x = cameraBasePosition.x + (Math.random() - 0.5) * shake;
+      camera.position.y = cameraBasePosition.y + (Math.random() - 0.5) * shake;
+      camera.position.z = currentZoom;
+
+      if (t >= 1) {
+        activationState = "flash";
+        activationStartedAt = now;
+        whiteFlash.classList.add("active");
+        statusTitle.textContent = "SEQUENCE COMPLETE";
+        statusText.textContent = "MINGGU STEM 2026";
+      }
+      return;
+    }
+
+    
+    if (activationState === "flash" && elapsed >= 750) {
+      activationState = "complete";
+    
+      whiteFlash.style.opacity = "1";
+      whiteFlash.classList.remove("active");
+      whiteFlash.style.background = "#fff";
+    
+      // Keep music playing during the final poster 
+// fadeOutBackgroundMusic();
+// stopBinarySound();
+    
+      setTimeout(() => {
+        document.getElementById("posterScreen").classList.add("show");
+      }, 1000);
+    }
+
+  }
+
+
+  function animate() {
+    requestAnimationFrame(animate);
+
+    if (!renderer || !planet) return;
+
+    const now = performance.now();
+
+    if (activationState === "idle") {
+      // Smooth zoom and restore camera to the centre before lock-on.
+      currentZoom += (targetZoom - currentZoom) * SETTINGS.smoothness;
+      camera.position.x += (0 - camera.position.x) * 0.08;
+      camera.position.y += (0 - camera.position.y) * 0.08;
+      camera.position.z = currentZoom;
+
+      planet.rotation.x += (targetRotX - planet.rotation.x) * 0.12;
+      planet.rotation.y += (targetRotY - planet.rotation.y) * 0.12;
+
+      for (const ring of rotatingTechRings) {
+        ring.spinner.rotation.z += ring.speed * 0.01;
+      }
+      // Move the outer Iron Man-style orbital rings.
+        for (const orbit of sciFiOrbits) {
+          orbit.group.rotation.z += orbit.speed;
+        }
+        
+        // Rotate MINGGU STEM rings
+        // Rotate the large circle on the opposite planet wall
+if (window.backWallCircle) {
+  window.backWallCircle.rotation.z += 0.002;
+  window.backWallCircle.userData.energyRing.rotation.z -= 0.012;
+}
+if (hiddenWords?.userData?.stemRings) {
+  hiddenWords.userData.stemRings.rotation.z += 0.015; 
+}
+
+      updateTargetLock(now); 
+    } else {
+      // Freeze ordinary motion and all ring motion during the finale.
+      updateActivation(now);
+    }
+    // Keep the school logo rotating even when it approaches the camera.
+if (hiddenWords?.userData?.stemLogo) {
+  hiddenWords.userData.stemLogo.rotation.z -= 0.03;
+}
+
+    renderer.render(scene, camera);
+  }
+
+  // =========================================
+  // HAND TRACKING HELPERS
+  // =========================================
+
+  function distance2D(a, b) {
+    const dx = a.x - b.x;
+    const dy = a.y - b.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  function getPalmCenter(hand) {
+    // Middle finger base landmark.
+    return {
+      x: hand[9].x,
+      y: hand[9].y
+    };
+  }
+
+  function isFist(hand) {
+  const fingerTips = [8, 12, 16, 20];
+  const fingerPips = [6, 10, 14, 18];
+
+  let curled = 0;
+
+  for (let i = 0; i < fingerTips.length; i++) {
+    const tip = hand[fingerTips[i]];
+    const pip = hand[fingerPips[i]];
+    const wrist = hand[0];
+
+    const tipDistance = distance2D(tip, wrist);
+    const pipDistance = distance2D(pip, wrist);
+
+    // More tolerant of natural differences in fist shape.
+    if (tipDistance < pipDistance * 1.25) {
+      curled++;
+    }
+  }
+
+  // Detect a fist when at least 3 fingers are curled.
+  return curled >= 3;
+}
+
+  // =========================================
+  // MEDIAPIPE RESULTS
+  // =========================================
+
+  function onResults(results) {
+    handResults = results.multiHandLandmarks || [];
+
+    const hands = handResults;
+    lastHandCount = hands.length;
+
+    if (hands.length === 0) {
+      lastFist = null;
+      lastHandDistance = null;
+
+      statusTitle.textContent = "SEARCHING";
+      statusText.textContent = "Show your hands to camera";
+      gestureText.textContent = "NO HANDS DETECTED";
+      return;
+    }
+
+    statusTitle.textContent = "TRACKING ACTIVE";
+    statusText.textContent = hands.length + " hand(s) detected";
+
+    // -----------------------------------------
+    // FIST: rotate the view with hand movement.
+    // -----------------------------------------
+
+    let fistHand = null;
+
+    for (const hand of hands) {
+      if (isFist(hand)) {
+        fistHand = hand;
+        break;
+      }
+    }
+
+    if (fistHand) {
+        welcomeMessage.classList.add("fist-detected");
+      const center = getPalmCenter(fistHand);
+      
+      
+      // Dismiss the welcome message by moving a fist
+      // near any edge of the webcam view.
+            // Dismiss welcome when a fist moves to the RIGHT.
+      if (!welcomeDismissed) {
+  // Save the starting position of the detected fist.
+  if (lastFist === null) {
+    lastFist = center;
+    return;
+  }
+
+  // Your webcam preview is mirrored.
+  // Moving your fist RIGHT on screen makes x decrease.
+  const dx = center.x - lastFist.x;
+
+  // Accumulate movement to reduce missed gestures.
+  if (typeof window.welcomeMoveProgress !== "number") {
+    window.welcomeMoveProgress = 0;
+  }
+
+  if (dx < 0) {
+    window.welcomeMoveProgress += Math.abs(dx);
+  } else {
+    // Do not let small tracking fluctuations build up forever.
+    window.welcomeMoveProgress = Math.max(
+      0,
+      window.welcomeMoveProgress - dx * 0.5
+    );
+  }
+
+  // Dismiss after sufficient rightward fist movement.
+  if (window.welcomeMoveProgress >= 0.12) {
+    welcomeDismissed = true;
+    welcomeMessage.classList.add("dismissed");
+    welcomeMessage.classList.remove("fist-detected");
+
+    window.welcomeMoveProgress = 0;
+    lastFist = center;
+
+    statusTitle.textContent = "WELCOME COMPLETE";
+    statusText.textContent = "Planet controls unlocked";
+    gestureText.textContent = "✊ FIST — ROTATING VIEW";
+
+    return;
+  }
+
+  lastFist = center;
+  return;
+}
+
+
+      if (lastFist) {
+        // Mirroring the x movement makes controls
+        // feel natural with a mirrored webcam preview.
+        const dx = center.x - lastFist.x;
+        const dy = center.y - lastFist.y;
+
+        targetRotY -= dx * SETTINGS.rotationSensitivity;
+        targetRotX += dy * SETTINGS.rotationSensitivity;
+
+        // Prevent extreme accumulated rotations.
+        targetRotX = Math.max(
+          -Math.PI * 3,
+          Math.min(Math.PI * 3, targetRotX)
+        );
+      }
+
+      lastFist = center;
+
+      gestureText.textContent = "✊ FIST — ROTATING VIEW";
+      lastHandDistance = null;
+twoHandsDetectedAt = 0;
+smoothedSeparation = null; 
+return; 
+    }
+
+    welcomeMessage.classList.remove("fist-detected");
+    lastFist = null;
+
+    // -----------------------------------------
+    // TWO HANDS: control zoom using separation.
+    // -----------------------------------------
+
+    
+
+if (hands.length >= 2) {
+  const centerA = getPalmCenter(hands[0]);
+  const centerB = getPalmCenter(hands[1]);
+
+  const separation = distance2D(centerA, centerB);
+  const now = performance.now();
+
+  // First detection: remember the current hand position.
+  if (twoHandsDetectedAt === 0) {
+    twoHandsDetectedAt = now;
+    smoothedSeparation = separation;
+    initialSeparation = separation;
+
+    gestureText.textContent = "HOLD STILL — CALIBRATING...";
+    return;
+  }
+
+  // Smooth tracking noise.
+  smoothedSeparation +=
+    (separation - smoothedSeparation) * 0.08;
+
+  // Wait one second, without changing the zoom.
+  if (now - twoHandsDetectedAt < 200) {
+    initialSeparation = smoothedSeparation;
+    gestureText.textContent = "HOLD STILL — CALIBRATING...";
+    return;
+  }
+
+  // Treat the hand distance at the end of calibration
+  // as the neutral position.
+  if (initialSeparation === null) {
+    initialSeparation = smoothedSeparation;
+  }
+
+  // Only zoom when hands move noticeably from neutral.
+  const movement = smoothedSeparation - initialSeparation;
+  const deadZone = 0.04;
+
+  if (Math.abs(movement) > deadZone) {
+    const adjustedMovement =
+      movement - Math.sign(movement) * deadZone;
+
+    // Gradual zoom instead of jumping to a new distance.
+    targetZoom -= adjustedMovement * 4.5;
+
+    targetZoom = Math.max(
+      SETTINGS.zoomIn,
+      Math.min(SETTINGS.zoomOut, targetZoom)
+    );
+
+    // Slowly update the neutral point to reduce drift.
+    initialSeparation += movement * 0.015;
+  }
+
+  lastHandDistance = smoothedSeparation;
+  gestureText.textContent = "↔ TWO HANDS — MOVE TO ZOOM";
+  return;
+
+} else {
+  twoHandsDetectedAt = 0;
+  smoothedSeparation = null;
+  initialSeparation = null;
+}
+
+
+
+    // -----------------------------------------
+    // ONE OPEN HAND: hold the current zoom.
+    // -----------------------------------------
+
+    gestureText.textContent = "OPEN HAND — READY";
+  }
+
+  // =========================================
+  // START / STOP CAMERA
+  // =========================================
+
+  async function startCamera() {
+    if (running) return;
+
+    enterBtn.disabled = true;
+    startBtn.disabled = true;
+
+    enterBtn.textContent = "INITIALIZING...";
+    startBtn.textContent = "STARTING...";
+    errorText.textContent = "";
+
+    try {
+      if (!navigator.mediaDevices ||
+          !navigator.mediaDevices.getUserMedia) {
+        throw new Error(
+          "Camera access requires HTTPS or localhost. Open the site using GitHub Pages."
+        );
+      }
+
+      // Request webcam permission.
+      cameraStream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: {
+          facingMode: "user",
+          width: { ideal: 640 },
+          height: { ideal: 480 }
+        }
+      });
+
+      video.srcObject = cameraStream;
+      await video.play();
+
+      video.style.display = "block";
+
+      if (!handTracker) {
+        handTracker = new Hands({
+          locateFile: file =>
+            "https://cdn.jsdelivr.net/npm/@mediapipe/hands/" + file
+        });
+
+        handTracker.setOptions({
+          maxNumHands: 2,
+          modelComplexity: 1,
+          minDetectionConfidence: 0.60,
+          minTrackingConfidence: 0.55
+        });
+
+        handTracker.onResults(onResults);
+      }
+
+      
+running = true;
+help.classList.add("hidden");  
+ 
+
+ // Show the welcome message 1 second after the camera starts.
+welcomeDismissed = false;
+lastFist = null; 
+window.welcomeMoveProgress = 0;
+
+welcomeMessage.classList.add("hidden");
+welcomeMessage.classList.remove("dismissed", "fist-detected");
+ 
+
+setTimeout(() => {
+  if (running && !welcomeDismissed) {
+    welcomeMessage.classList.remove("hidden");
+
+    // Play sound when the welcome message appears
+    welcomeSound.currentTime = 0;
+
+welcomeSound.play().then(() => {
+  setTimeout(() => {
+    welcomeSound.pause();
+    welcomeSound.currentTime = 0; 
+  }, 1600); // Stop after 3 seconds
+}).catch(error => {
+  console.log("Welcome sound playback failed:", error);
+});
+
+    // Show the mission message 0.5 seconds later
+    setTimeout(() => {
+      if (running && !welcomeDismissed) {
+        document
+          const mission = document.getElementById("missionMessage");
+            mission.classList.remove("hidden");
+            mission.classList.remove("pop-up");
+            
+            // Restart animation
+            void mission.offsetWidth; 
+            
+            mission.classList.add("pop-up");
+      }
+    }, 900);
+  }
+}, 1000);
+  
+
+
+startBtn.textContent = "BACK TO MENU";
+
+      startBtn.disabled = false;
+
+      statusTitle.textContent = "CAMERA READY";
+      statusText.textContent = "Show both hands";
+
+      // Use the webcam frames directly. This avoids
+      // requiring a separate camera utility instance.
+      processFrames();
+
+    } catch (error) {
+      console.error(error);
+
+      running = false;
+
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+      }
+
+      video.srcObject = null;
+      video.style.display = "none";
+
+      const message =
+        error.name === "NotAllowedError"
+          ? "Camera permission was denied. Allow camera access in your browser settings and try again."
+          : error.message || "Unable to start the webcam.";
+
+      errorText.textContent = message;
+      statusTitle.textContent = "CAMERA ERROR";
+      statusText.textContent = message;
+
+      enterBtn.textContent = "TRY AGAIN";
+      enterBtn.disabled = false;
+      startBtn.textContent = "START CAMERA ↗";
+      startBtn.disabled = false;
+    }
+  }
+
+  async function processFrames() {
+    if (!running || !handTracker) return;
+
+    if (!processingFrame &&
+        video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      processingFrame = true;
+
+      try {
+        await handTracker.send({ image: video });
+      } catch (error) {
+        console.warn("Hand tracking frame failed:", error);
+      } finally {
+        processingFrame = false;
+      }
+    }
+
+    if (running) {
+      requestAnimationFrame(processFrames);
+    }
+  }
+
+  function stopCamera() {
+    running = false;
+
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      cameraStream = null;
+    }
+
+    video.srcObject = null;
+    video.style.display = "none";
+
+    lastFist = null;
+    lastHandDistance = null;
+
+    startBtn.textContent = "START CAMERA ↗";
+    startBtn.disabled = false;
+
+    statusTitle.textContent = "SYSTEM STANDBY";
+    statusText.textContent = "Camera stopped";
+    gestureText.textContent = "WAITING FOR HANDS";
+
+    help.classList.remove("hidden");
+    enterBtn.textContent = "INITIALIZE CAMERA";
+    enterBtn.disabled = false;
+  }
+
+  
+enterBtn.addEventListener("click", async () => {
+  try {
+    // Enter fullscreen when INITIALIZE NOW is clicked.
+    if (!document.fullscreenElement) {
+      await document.documentElement.requestFullscreen();
+    }
+  } catch (error) {
+    console.warn("Fullscreen unavailable:", error);
+  }
+
+  // Continue with the existing camera initialization.
+  startCamera();
+});
+
+
+  startBtn.addEventListener("click", () => {
+    if (running) {
+      stopCamera();
+    } else {
+      startCamera();
+    }
+  });
+
+  // =========================================
+  // INITIALIZE
+  // =========================================  
+
+  try {
+    init3D();
+  } catch (error) {
+    console.error("Three.js initialization failed:", error);
+
+    statusTitle.textContent = "3D ERROR";
+    statusText.textContent = "Check WebGL and CDN access";
+  }
+
+})();
+</script>
+
+<!-- FINAL POSTER SCREEN -->
+
+<div id="posterScreen">
+  <img
+    id="finalPoster"
+    src="https://raw.githubusercontent.com/julf95/classroom/main/Black%20Closed%20Sign%20Landscape%20Poster.png"
+    alt="SR Ar Raudhah Poster"
+  >
+
+
+  <!-- Animated fire sparks -->
+  <canvas id="fireSparks"></canvas>
+  <!-- Sci-fi loading bar -->
+    <div id="posterLoadingBar">
+      <div id="posterLoadingFill"></div>
+    </div>
+    <div id="activationText"></div>
+    </div>
+
+<div id="blackFade"></div>
+
+<script>
+(() => {
+  const canvas = document.getElementById("fireSparks");
+  const poster = document.getElementById("posterScreen");
+  const ctx = canvas.getContext("2d");
+
+  let width = 0;
+  let height = 0;
+  let sparks = [];
+  let lastTime = 0;
+  let animationStarted = false;
+
+  const SPARK_COUNT = 100;
+
+  function resizeSparks() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    width = window.innerWidth;
+    height = window.innerHeight;
+
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function createSpark(randomStart = false) {
+    const fromLeft = Math.random() < 0.5;
+
+    return {
+      x: randomStart
+        ? Math.random() * width
+        : (fromLeft ? -20 : width + 20),
+
+      y: randomStart
+        ? Math.random() * height
+        : Math.random() * height,
+
+      vx: (35 + Math.random() * 115) *
+        (fromLeft ? 1 : -1),
+
+      vy: (Math.random() - 0.5) * 35,
+
+      size: 0.8 + Math.random() * 2.5,
+      life: Math.random(),
+      lifetime: 1.5 + Math.random() * 3.5,
+
+      flicker: Math.random() * Math.PI * 2,
+      wave: 0.5 + Math.random() * 2.5,
+
+      // Occasional brighter embers
+      bright: Math.random() < 0.18
+    };
+  }
+
+  function initializeSparks() {
+    sparks = [];
+
+    for (let i = 0; i < SPARK_COUNT; i++) {
+      sparks.push(createSpark(true));
+    }
+  }
+
+  function drawSpark(spark, dt, time) {
+    // Uneven wind creates natural drifting motion.
+    const gust =
+      Math.sin(time * 0.0012 + spark.flicker) * 28 +
+      Math.sin(time * 0.0021 + spark.y * 0.01) * 14;
+
+    spark.x += (spark.vx + gust) * dt;
+
+    spark.y += (
+      spark.vy +
+      Math.sin(time * 0.0018 + spark.flicker) * 15
+    ) * dt;
+
+    spark.life += dt / spark.lifetime;
+
+    if (
+      spark.life >= 1 ||
+      spark.x < -50 ||
+      spark.x > width + 50 ||
+      spark.y < -50 ||
+      spark.y > height + 50
+    ) {
+      Object.assign(spark, createSpark(false));
+      return;
+    }
+
+    const fadeIn = Math.min(1, spark.life * 5);
+    const fadeOut = Math.min(1, (1 - spark.life) * 3);
+    const flicker = 0.65 +
+      Math.sin(time * 0.015 + spark.flicker) * 0.35;
+
+    const alpha = fadeIn * fadeOut * flicker;
+    const length = spark.size * (4 + Math.abs(spark.vx) * 0.055);
+
+    // Draw a short ember trail behind the moving spark.
+    const tailX = spark.x - Math.sign(spark.vx) * length;
+    const tailY = spark.y - spark.vy * 0.07;
+
+    const gradient = ctx.createLinearGradient(
+      tailX, tailY, spark.x, spark.y
+    );
+
+    gradient.addColorStop(0, "rgba(255,65,0,0)");
+    gradient.addColorStop(
+      0.55,
+      `rgba(255,${spark.bright ? 155 : 95},20,${alpha * 0.7})`
+    );
+    gradient.addColorStop(
+      1,
+      `rgba(255,${spark.bright ? 245 : 190},105,${alpha})`
+    );
+
+    ctx.beginPath();
+    ctx.moveTo(tailX, tailY);
+    ctx.lineTo(spark.x, spark.y);
+    ctx.strokeStyle = gradient;
+    ctx.lineWidth = spark.size;
+    ctx.lineCap = "round";
+    ctx.stroke();
+
+    // Glowing ember head
+    ctx.beginPath();
+    ctx.arc(
+      spark.x,
+      spark.y,
+      spark.size * (spark.bright ? 1.35 : 0.8),
+      0,
+      Math.PI * 2
+    );
+
+    ctx.fillStyle = `rgba(255,${spark.bright ? 245 : 185},85,${alpha})`;
+
+    ctx.shadowBlur = spark.bright ? 15 : 7;
+    ctx.shadowColor = "#ff6500";
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+
+  function animateSparks(time) {
+    if (!poster.classList.contains("show")) {
+      animationStarted = false;
+      return;
+    }
+
+    const dt = lastTime
+      ? Math.min((time - lastTime) / 1000, 0.04)
+      : 0.016;
+
+    lastTime = time;
+
+    ctx.clearRect(0, 0, width, height);
+
+    for (const spark of sparks) {
+      drawSpark(spark, dt, time);
+    }
+
+    requestAnimationFrame(animateSparks);
+  }
+
+  function startFireSparks() {
+    if (animationStarted) return;
+
+    animationStarted = true;
+    lastTime = 0;
+
+    resizeSparks();
+    initializeSparks();
+
+    requestAnimationFrame(animateSparks);
+  }
+
+  window.addEventListener("resize", resizeSparks);
+
+  // Wait until your existing ending sequence reveals the poster.
+  const loadingBar = document.getElementById("posterLoadingBar");
+    const activationText = document.getElementById("activationText");
+    
+    const posterObserver = new MutationObserver(() => {
+      if (poster.classList.contains("show")) {
+        startFireSparks();
+    
+        if (loadingBar && !loadingBar.dataset.started) {
+          loadingBar.dataset.started = "true";
+    
+          setTimeout(() => {
+            loadingBar.classList.add("visible");
+    
+            // Wait until the 3-second loading animation finishes
+            setTimeout(() => {
+              activationText.classList.add("visible");
+    
+              const message = "PELANCARAN TELAH DIAKTIFKAN";
+              let index = 0;
+    
+              activationText.textContent = "";
+    
+              const typeInterval = setInterval(() => {
+                activationText.textContent += message[index];
+                index++;
+    
+                if (index >= message.length) {
+                  clearInterval(typeInterval);
+                
+                  // Wait 1 second, then change the text
+                  setTimeout(() => {
+                    activationText.textContent = "";
+                
+                    const newMessage = "SEMOGA BERJAYA...";
+                    let newIndex = 0;
+                
+                    const newTypeInterval = setInterval(() => {
+                      activationText.textContent += newMessage[newIndex];
+                      newIndex++;
+                
+                      if (newIndex >= newMessage.length) {
+                        clearInterval(newTypeInterval);
+                      }
+                    }, 0.5);
+                  }, 3000);
+                }
+              }, 30); // Fast typewriter speed
+    
+            }, 3100);
+    
+          }, 1500);
+        }
+      }
+    });
+ 
+  posterObserver.observe(poster, {
+    attributes: true,   
+    attributeFilter: ["class"]
+  });
+
+  // Also support the poster already being visible.
+  if (poster.classList.contains("show")) {
+    startFireSparks();
+  }
+})();
+</script>
+
+
+<script>
+(() => {
+  const poster = document.getElementById("posterScreen");
+  const blackFade = document.getElementById("blackFade");
+
+  let endingStarted = false;
+
+  document.addEventListener("keydown", function (event) {
+    // Only respond when the poster is visible.
+    if (!poster.classList.contains("show")) return;
+
+    // Trigger only with the SPACE key.
+    if (event.code !== "Space") return;
+
+    // Prevent repeated triggers.
+    if (endingStarted) return;
+
+    event.preventDefault();
+    endingStarted = true;
+
+    // Fade the screen to black.
+    blackFade.classList.add("active");
+
+    // Fade out the final Marvel music.
+    fadeOutBackgroundMusic();
+  });
+})();
+</script>
+
+
+</body>
+</html>

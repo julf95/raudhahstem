@@ -1295,8 +1295,8 @@ function playMarvelFinal40() {
     }
 
     // Start at 60% of the song = play the final 40%
-    backgroundMusic.currentTime = duration * 0.70;
-    backgroundMusic.volume = 0.8;
+    backgroundMusic.currentTime = duration * 0.838;
+    backgroundMusic.volume = 0.71;
     backgroundMusic.loop = false;
 
     backgroundMusic.play().catch(error => {
@@ -1318,7 +1318,7 @@ function playMarvelFinal40() {
 }
 
 function fadeOutBackgroundMusic() {
-  const fadeDuration = 3000;
+  const fadeDuration = 5000;
   const startVolume = backgroundMusic.volume;
   const startTime = performance.now();
 
@@ -1347,7 +1347,7 @@ backgroundMusic.addEventListener("timeupdate", () => {
   if (
     Number.isFinite(backgroundMusic.duration) &&
     backgroundMusic.duration > 3 &&
-    backgroundMusic.currentTime >= backgroundMusic.duration - 3 &&
+    backgroundMusic.currentTime >= backgroundMusic.duration - 5 &&
     !backgroundMusic.dataset.finalFadeStarted
   ) {
     backgroundMusic.dataset.finalFadeStarted = "true";

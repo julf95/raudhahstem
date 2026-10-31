@@ -1118,7 +1118,7 @@ body.activation-running #cameraPreview {
 
 <div id="welcomeMessage" class="hidden">
   <div class="welcome-line">
-      WELCOME BACK,<br>
+      SELAMAT DATANG,<br>
       UST BUNYAMIN
     </div>
   <div class="welcome-subtitle">*************</div>
@@ -1284,37 +1284,52 @@ function startBackgroundMusic() {
 
 // JUMP TO THE LAST 40% OF THE MARVEL THEME
 function playMarvelFinal40() {
-  backgroundMusic.pause();
+  const targetVolume = 0.99;
+  const fadeDuration = 1000; // 1 second
 
-  const jumpToFinalPart = () => {
-    const duration = backgroundMusic.duration;
+  // STEP 1: Fade out current music
+  const fadeOutStart = performance.now();
+  const startingVolume = backgroundMusic.volume;
 
-    if (!Number.isFinite(duration) || duration <= 0) {
-      console.log("Waiting for Marvel music duration...");
-      return;
-    }
-
-    // Start at 60% of the song = play the final 40%
-    backgroundMusic.currentTime = duration * 0.838;
-    backgroundMusic.volume = 0.71;
-    backgroundMusic.loop = false;
-
-    backgroundMusic.play().catch(error => {
-      console.log("Marvel finale playback failed:", error);
-    });
-  };
-
-  if (Number.isFinite(backgroundMusic.duration) &&
-      backgroundMusic.duration > 0) {
-    jumpToFinalPart();
-  } else {
-    backgroundMusic.addEventListener(
-      "loadedmetadata",
-      jumpToFinalPart,
-      { once: true }
+  function fadeOut(now) {
+    const progress = Math.min(
+      (now - fadeOutStart) / fadeDuration,
+      1
     );
-    backgroundMusic.load();
+
+    backgroundMusic.volume = startingVolume * (1 - progress);
+
+    if (progress < 1) {
+      requestAnimationFrame(fadeOut);
+    } else {
+
+      // STEP 2: Jump to the final 40% of the SAME track
+      backgroundMusic.volume = 0;
+      backgroundMusic.currentTime = backgroundMusic.duration * 0.85;
+
+      // STEP 3: Fade the SAME music back in
+      const fadeInStart = performance.now();
+
+      function fadeIn(now) {
+        const progress = Math.min(
+          (now - fadeInStart) / fadeDuration,
+          1
+        );
+
+        backgroundMusic.volume = targetVolume * progress;
+
+        if (progress < 1) {
+          requestAnimationFrame(fadeIn);
+        } else {
+          backgroundMusic.volume = targetVolume;
+        }
+      }
+
+      requestAnimationFrame(fadeIn);
+    }
   }
+
+  requestAnimationFrame(fadeOut);
 }
 
 function fadeOutBackgroundMusic() {
@@ -1369,7 +1384,7 @@ document.addEventListener("pointerdown", function playMusicOnce() {
 
 // BINARY CODE SOUND — PRELOAD EARLY
 const binarySound = new Audio(
-  "https://raw.githubusercontent.com/julf95/classroom/main/sci-fi-button-sound-effect_TRUqODXT.m4a"
+  "https://raw.githubusercontent.com/julf95/classroom/main/pixel-anime-by-moodmode-royalty-free-music-323971.mp3"
 );
 
 // SCHOLAR SCAN SUCCESS SOUND
